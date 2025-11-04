@@ -1,8 +1,18 @@
 import Link from "next/link";
-import {Lock, Mail, User, Send, Phone, Calendar} from "lucide-react"
-export default function Home() {
+import {Lock, Mail, User, Send, Phone, Calendar, Home} from "lucide-react"
+export default function Page() {
     return (
         <div className="min-h-screen bg-blue-500">
+
+            <Link
+                href="/"
+                className="absolute top-6 left-6 z-10 flex items-center gap-2 text-white bg-blue-500 rounded-xl p-2 px-4
+                hover:bg-blue-600 transition-colors duration-400 ease-in-out border-white border-2"
+            >
+                <Home size={20} />
+                <span>На главную</span>
+            </Link>
+
 
             <div className="bg-white absolute w-1/2 inset-y-0 right-0 rounded-l-[80px] flex items-center justify-center">
                 <div className="flex flex-col items-center justify-center gap-5 absolute w-1/2">
