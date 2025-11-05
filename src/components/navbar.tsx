@@ -15,18 +15,18 @@ function Navbar(){
 
         <div className="px-2 gap-2 flex flex-row items-center absolute left-1/2 -translate-x-1/2">
 
-            <Button variant="outline" className="rounded-3xl bg-blue-500 text-white border-blue-500
+            <Button variant="outline" className="rounded-xl bg-blue-500 text-white border-blue-500
                     hover:text-white hover:border-blue-600 hover:bg-blue-600
-                    transition-colors duration-400 ease-in-out h-[35px] ">Новости
+                    transition-colors duration-400 ease-in-out h-[40px] ">Новости
             </Button>
 
-            <Button variant="outline" className="rounded-3xl bg-white text-blue-500 border-blue-500
+            <Button variant="outline" className="rounded-xl border-2 font-bold bg-white text-blue-500 border-blue-500
                     hover:text-blue-500 hover:border-blue-500 hover:bg-gray-100
-                    transition-colors duration-400 ease-in-out h-[35px] ">Спортивные клубы</Button>
+                    transition-colors duration-400 ease-in-out h-[40px] ">Спортивные клубы</Button>
 
-            <Button variant="outline" className="rounded-3xl bg-white text-blue-500 border-blue-500
+            <Button variant="outline" className="rounded-xl font-bold border-2 bg-white text-blue-500 border-blue-500
                     hover:text-blue-500 hover:border-blue-500 hover:bg-gray-100
-                    transition-colors duration-400 ease-in-out h-[35px] ">Мероприятия</Button>
+                    transition-colors duration-400 ease-in-out h-[40px] ">Мероприятия</Button>
         </div>
 
         <Link
