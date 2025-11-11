@@ -23,18 +23,18 @@ export default function HomePage() {
                     </div>
                     <div className="w-full flex flex-row items-center gap-2 h-[35px]">
 
-                        <Button variant="outline" className="rounded-3xl bg-blue-500 text-white border-blue-500
+                        <Button variant="outline" className="rounded-xl border-2 bg-blue-500 text-white border-blue-500
                     hover:text-white hover:border-blue-600 hover:bg-blue-600
-                    transition-colors duration-400 ease-in-out h-[35px] ">Исторические
+                    transition-colors duration-400 ease-in-out h-[40px] ">Исторические
                         </Button>
 
-                        <Button variant="outline" className="rounded-3xl bg-white text-blue-500 border-blue-500
+                        <Button variant="outline" className="rounded-xl border-2 font-bold bg-white text-blue-500 border-blue-500
                     hover:text-blue-500 hover:border-blue-500 hover:bg-gray-100
-                    transition-colors duration-400 ease-in-out h-[35px] ">Организационные</Button>
+                    transition-colors duration-400 ease-in-out h-[40px] ">Организационные</Button>
 
-                        <Button variant="outline" className="rounded-3xl bg-white text-blue-500 border-blue-500
+                        <Button variant="outline" className="rounded-xl border-2 font-bold bg-white text-blue-500 border-blue-500
                     hover:text-blue-500 hover:border-blue-500 hover:bg-gray-100
-                    transition-colors duration-400 ease-in-out h-[35px] ">Достижения</Button>
+                    transition-colors duration-400 ease-in-out h-[40px] ">Достижения</Button>
                     </div>
                 </div>
             </div>
@@ -64,6 +64,8 @@ export default function HomePage() {
 
     );
 }
+
+
 
 
 function Post(){
