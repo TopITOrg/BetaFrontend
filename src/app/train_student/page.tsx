@@ -20,21 +20,18 @@ interface TrainingData {
 export default function HomePage() {
   const { month, week, timeslots, trainings } = trainingData as TrainingData;
 
-  // Функция для конвертации времени в минуты
   const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
   };
 
-  // Функция для определения, является ли ячейка частью тренировки
   const getTrainingForCell = (day: string, timeSlot: string) => {
     for (const training of trainings) {
       if (training.day === day) {
         const startMinutes = timeToMinutes(training.time);
         const endMinutes = timeToMinutes(training.endTime);
         const currentMinutes = timeToMinutes(timeSlot);
-        
-        // Если время ячейки попадает в интервал тренировки
+
         if (currentMinutes >= startMinutes && currentMinutes < endMinutes) {
           return { training };
         }
@@ -59,11 +56,9 @@ export default function HomePage() {
                     <span>{month}</span>
                 </div>
 
-                {/* Таблица тренировок */}
                 <div className="">
                 <div className="overflow-x-auto">
                     <table className="">
-                    {/* Заголовок таблицы */}
                     <thead className="bg-gray-100">
                         <tr>
                         <th className="p-2 border border-gray-300 font-semibold text-gray-700 text-xs min-w-[70px]">
@@ -79,17 +74,13 @@ export default function HomePage() {
                         ))}
                         </tr>
                     </thead>
-
-                    {/* Тело таблицы */}
                     <tbody>
                         {timeslots.map((timeSlot, timeIndex) => (
                         <tr key={timeIndex} className="hover:bg-gray-50">
-                            {/* Временной слот с синей полосой */}
                             <td className="p-2 border border-gray-300 text-center font-medium text-gray-600 text-xs">
                             {timeSlot}
                             </td>
-                            
-                            {/* Ячейки для каждого дня недели */}
+
                             {week.map((day, dayIndex) => {
                             const trainingInfo = getTrainingForCell(day, timeSlot);
                             const isStart = trainingInfo && timeToMinutes(trainingInfo.training.time) === timeToMinutes(timeSlot);
