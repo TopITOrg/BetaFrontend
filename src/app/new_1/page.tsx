@@ -16,7 +16,7 @@ export default function Homepage() {
             <div className='flex justify-center pt-[40px] px-[25px] '>
                 <Card className='w-full h-full mb-[50px] shadow-md px-[20px]'>
                     <div className='flex flex-row items-center gap-3'>
-                        <Avatar className='h-[100px] w-[100px]'>
+                        <Avatar className='h-[40px] w-[40px]'>
   							<AvatarImage src="https://github.com/shadcn.png" />
   							<AvatarFallback>CN</AvatarFallback>
 						</Avatar>

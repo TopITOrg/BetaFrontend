@@ -1,9 +1,25 @@
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import Image from "next/image";
 
 export default function HomePage() {
+    /* type SectionDTO = {
+            name: string
+            place: string
+            min_train: string
+            level: string
+            amount_places: string
+            description: string
+        }
+        const {data : sections = []} = useQuery({
+            queryKey: ["todos"],
+            queryFn: async () => {
+            const res = await axios.get<SectionDTO[]>("http://localhost:3002/sections")
+            return res.data}
+        }) */
     return (
         <main>
             <div className='flex flex-col sticky top-0 bg-white z-70'>
