@@ -35,7 +35,7 @@ export default function HomePage() {
         <main className="flex flex-col min-h-screen bg-white">
 
             <div className="flex flex-col sticky top-0 bg-white z-10 gap-2 mb-2">
-                <Navbar selectedButton={1} />
+                <Navbar selectedButton={2} />
                 <div className="w-full border-gray-100 flex flex-col justify-center px-20">
                     <div className="h-[40px] relative">
                         <Input placeholder="Поиск" className="rounded-xl border-gray-500 h-full"></Input>
