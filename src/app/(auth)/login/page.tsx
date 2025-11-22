@@ -1,7 +1,30 @@
-import { Lock, Mail, Home } from "lucide-react"; // Добавил иконку Home
-import Link from "next/link";
+'use client'; // ← ДОБАВЬТЕ ЭТУ СТРОКУ В САМОМ НАЧАЛЕ ФАЙЛА
 
-export default function HomePage() {
+import { Lock, Mail, Home } from "lucide-react";
+import Link from "next/link";
+import { useLogin } from 'src/hooks/useLogin'; // Проверьте путь
+import { useState } from 'react';
+
+export default function LoginPage() {
+    const { mutate: login, isPending, error } = useLogin();
+
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        login(formData);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
     return (
         <div className="min-h-screen bg-blue-500">
 
@@ -15,27 +38,34 @@ export default function HomePage() {
                 <span>На главную</span>
             </Link>
 
-
             <div className="bg-white absolute w-1/2 inset-y-0 right-0 rounded-l-[80px] flex items-center justify-center">
                 <div className="flex flex-col items-center justify-center gap-5 absolute w-1/2">
 
                     <h1 className="text-black font-bold text-4xl">Вход</h1>
-                    <form className="flex flex-col items-center gap-4 w-full">
+                    <form className="flex flex-col items-center gap-4 w-full" onSubmit={handleSubmit}>
 
                         <div className="relative w-full">
                             <input
+                                name="email"
                                 type="email"
                                 placeholder="Email"
+                                value={formData.email}
+                                onChange={handleChange}
                                 className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                required
                             />
                             <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
 
                         <div className="relative w-full">
                             <input
+                                name="password"
                                 type="password"
                                 placeholder="Пароль"
+                                value={formData.password}
+                                onChange={handleChange}
                                 className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                required
                             />
                             <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
@@ -43,13 +73,25 @@ export default function HomePage() {
                         <label className="text-blue-500 hover:text-blue-800 transition-colors duration-400 ease-in-out">
                             Забыли пароль?
                         </label>
+
                         <button
                             type="submit"
+                            disabled={isPending}
                             className="text-white bg-blue-500 font-bold text-xl rounded-xl p-2 px-8
-                            hover:bg-blue-700 w-full transition-colors duration-400 ease-in-out"
+                            hover:bg-blue-700 w-full transition-colors duration-400 ease-in-out
+                            disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Войти
+                            {isPending ? 'Вход...' : 'Войти'}
                         </button>
+
+                        {/* Отображение ошибок */}
+                        {error && (
+                            <div className="text-red-500 text-sm text-center">
+                                {error.message?.includes('Email or password')
+                                    ? 'Email или пароль неверны'
+                                    : error.message || 'Произошла ошибка'}
+                            </div>
+                        )}
 
                     </form>
 
