@@ -7,7 +7,6 @@ const api = axios.create({
     },
 });
 
-// Интерцептор для обработки ошибок
 api.interceptors.response.use(
     (response) => response,
     (error) => {

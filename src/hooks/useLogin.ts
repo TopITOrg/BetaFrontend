@@ -37,7 +37,7 @@ export const useLogin = () => {
             localStorage.setItem('refresh_token', data.refresh_token);
 
             // Перенаправляем пользователя
-            router.push('/dashboard');
+            router.push('/clubs');
         },
     });
 };

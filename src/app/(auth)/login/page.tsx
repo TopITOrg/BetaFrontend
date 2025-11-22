@@ -1,8 +1,8 @@
-'use client'; // ← ДОБАВЬТЕ ЭТУ СТРОКУ В САМОМ НАЧАЛЕ ФАЙЛА
+'use client';
 
 import { Lock, Mail, Home } from "lucide-react";
 import Link from "next/link";
-import { useLogin } from 'src/hooks/useLogin'; // Проверьте путь
+import { useLogin } from 'src/hooks/useLogin';
 import { useState } from 'react';
 
 export default function LoginPage() {

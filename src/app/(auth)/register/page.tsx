@@ -10,7 +10,7 @@ export default function Page() {
 
     const [formData, setFormData] = useState({
         full_name: '',
-        social_network_link: '', // Было telegram
+        social_network_link: '',
         phone_number: '',
         email: '',
         birth_date: '',

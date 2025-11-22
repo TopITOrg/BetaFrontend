@@ -7,7 +7,7 @@ interface RegisterData {
     social_network_link: string;
     phone_number: string;
     email: string;
-    birth_date: string; // Будет преобразовано в Date
+    birth_date: string;
     password: string;
     group_id?: number | null;
 }
@@ -49,7 +49,7 @@ export const useRegister = () => {
             localStorage.setItem('refresh_token', data.refresh_token);
 
             // Перенаправляем пользователя
-            router.push('/dashboard');
+            router.push('/clubs');
         },
     });
 };
