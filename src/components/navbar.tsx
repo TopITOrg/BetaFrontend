@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LogIn, CircleUserRound, LogOut } from "lucide-react";
+import { LogIn, CircleUserRound, LogOut, User } from "lucide-react";
 import { CustomButton } from "./CustomButton";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
@@ -67,6 +67,17 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
                                 <p className="font-semibold text-gray-800">{user?.full_name}</p>
                                 <p className="text-sm text-gray-600">{user?.email}</p>
                             </div>
+
+                            {/* ДОБАВЛЕНА ССЫЛКА НА РЕДАКТИРОВАНИЕ ПРОФИЛЯ */}
+                            <Link href="/edit">
+                                <button
+                                    onClick={() => setIsDropdownOpen(false)}
+                                    className="w-full flex items-center gap-2 p-3 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                                >
+                                    <User size={16} />
+                                    <span>Мой профиль</span>
+                                </button>
+                            </Link>
 
                             <button
                                 onClick={handleLogout}

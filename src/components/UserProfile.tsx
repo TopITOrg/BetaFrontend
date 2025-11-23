@@ -1,8 +1,9 @@
 'use client';
 
-import { CircleUserRound, LogOut } from 'lucide-react';
+import { CircleUserRound, LogOut, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export const UserProfile = () => {
     const { user, logout } = useAuth();
@@ -25,10 +26,16 @@ export const UserProfile = () => {
 
             {isDropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="p-3 border-b border-gray-100">
-                        <p className="font-semibold text-gray-800">{user?.full_name}</p>
-                        <p className="text-sm text-gray-600">{user?.email}</p>
-                    </div>
+                    {/* Исправленная ссылка - ведем на /edit */}
+                    <Link href="/edit">
+                        <button
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="w-full flex items-center gap-2 p-3 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                        >
+                            <User size={16} />
+                            <span>Мой профиль</span>
+                        </button>
+                    </Link>
 
                     <button
                         onClick={handleLogout}

@@ -7,6 +7,11 @@ interface User {
     full_name: string;
     email: string;
     role: string;
+    social_network_link?: string;
+    phone_number?: string;
+    birth_date?: string;
+    group_id?: number;
+    group_name?: string;
 }
 
 interface AuthContextType {
@@ -14,6 +19,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     login: (userData: User, tokens: { access_token: string; refresh_token: string }) => void;
     logout: () => void;
+    updateUser: (userData: Partial<User>) => void; // Добавляем функцию обновления
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,7 +28,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Проверяем аутентификацию при загрузке
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         const userData = localStorage.getItem('user_data');
@@ -56,8 +61,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(false);
     };
 
+    const updateUser = (userData: Partial<User>) => {
+        if (user) {
+            const updatedUser = { ...user, ...userData };
+            localStorage.setItem('user_data', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
