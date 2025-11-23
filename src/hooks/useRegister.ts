@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import api from '../lib/api';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface RegisterData {
     full_name: string;
@@ -30,10 +31,10 @@ interface RegisterResponse {
 
 export const useRegister = () => {
     const router = useRouter();
+    const { login } = useAuth();
 
     return useMutation<RegisterResponse, Error, RegisterData>({
         mutationFn: async (userData: RegisterData) => {
-            // Преобразуем дату в формат ISO
             const formattedData = {
                 ...userData,
                 birth_date: new Date(userData.birth_date).toISOString(),
@@ -44,11 +45,16 @@ export const useRegister = () => {
             return response.data;
         },
         onSuccess: (data) => {
-            // Сохраняем токены
-            localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('refresh_token', data.refresh_token);
+            login({
+                id: data.id,
+                full_name: data.full_name,
+                email: data.email,
+                role: data.role
+            }, {
+                access_token: data.access_token,
+                refresh_token: data.refresh_token
+            });
 
-            // Перенаправляем пользователя
             router.push('/clubs');
         },
     });

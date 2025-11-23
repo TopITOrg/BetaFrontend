@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import api from '../lib/api';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
+
 
 interface LoginData {
     email: string;
@@ -25,6 +27,7 @@ interface LoginResponse {
 
 export const useLogin = () => {
     const router = useRouter();
+    const { login } = useAuth();
 
     return useMutation<LoginResponse, Error, LoginData>({
         mutationFn: async (loginData: LoginData) => {
@@ -32,11 +35,16 @@ export const useLogin = () => {
             return response.data;
         },
         onSuccess: (data) => {
-            // Сохраняем токены
-            localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('refresh_token', data.refresh_token);
+            login({
+                id: data.id,
+                full_name: data.full_name,
+                email: data.email,
+                role: data.role
+            }, {
+                access_token: data.access_token,
+                refresh_token: data.refresh_token
+            });
 
-            // Перенаправляем пользователя
             router.push('/clubs');
         },
     });
