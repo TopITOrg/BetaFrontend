@@ -3,10 +3,12 @@ import {Button} from "@/components/ui/button";
 function CustomButton({
                           text,
                           isSelected = false,
+                          width, // Опциональный параметр
                           ...props
                       }: {
     text: string;
     isSelected: boolean;
+    width?: string; // Опциональный параметр для ширины
 } & React.ComponentProps<typeof Button>) {
 
     const baseClasses = "rounded-xl border-2 font-bold transition-colors duration-400 ease-in-out h-[40px]";
@@ -18,6 +20,7 @@ function CustomButton({
     return (
         <Button
             variant="outline"
+            style={width ? { width } : undefined} // Устанавливаем ширину только если передан параметр
             className={`${baseClasses} ${selectedClasses}`}
             {...props}
         >
