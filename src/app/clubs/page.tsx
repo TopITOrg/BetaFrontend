@@ -1,63 +1,48 @@
 "use client"
 
-import {CircleUserRound, Hexagon, Lock, LogIn, Search} from "lucide-react";
+import { CircleUserRound, Hexagon, Lock, LogIn, Search } from "lucide-react";
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Navbar } from "@/components/navbar"
-import  type {ClubData} from "@/components/ClubCard"
 import { ClubCard } from "@/components/ClubCard"
 import { useState, useMemo } from "react";
+import { useClubs } from "@/hooks/useClubs";
+import { mapApiClubToCardData } from "@/types/club";
 
 type SkillLevel = 'beginner' | 'advanced' | 'gss';
 
-const clubsData: ClubData[] = [
-    {
-        title: "Футбол",
-        availableSpots: "15/45",
-        location: "улица Ленина, д. 144, 3 этаж",
-        workoutsPerWeek: "3-4",
-        skillLevel: "начальный"
-    },
-    {
-        title: "Баскетбол",
-        availableSpots: "10/30",
-        location: "ул. Спортивная, д. 25",
-        workoutsPerWeek: "2-3",
-        skillLevel: "продвинутый"
-    },
-    {
-        title: "Волейбол",
-        availableSpots: "20/35",
-        location: "пр. Победы, д. 67",
-        workoutsPerWeek: "4-5",
-        skillLevel: "начальный"
-    },
-    {
-        title: "Теннис",
-        availableSpots: "5/15",
-        location: "ул. Центральная, д. 89",
-        workoutsPerWeek: "3-4",
-        skillLevel: "ГСС"
-    },
-    {
-        title: "Плавание",
-        availableSpots: "25/50",
-        location: "пр. Мира, д. 42",
-        workoutsPerWeek: "5-6",
-        skillLevel: "продвинутый"
-    },
-    {
-        title: "Легкая атлетика",
-        availableSpots: "30/60",
-        location: "ул. Спортивная, д. 15",
-        workoutsPerWeek: "4-5",
-        skillLevel: "ГСС"
-    }
-];
+const levelToApiMap: { [key in SkillLevel]: string } = {
+    'beginner': 'начальный',
+    'advanced': 'продвинутый',
+    'gss': 'ГСС'
+};
 
 export default function HomePage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLevels, setSelectedLevels] = useState<SkillLevel[]>([]);
+
+    // Подготавливаем параметры для API
+    const apiParams = useMemo(() => {
+        const params: any = {};
+
+        if (searchQuery.trim()) {
+            params.name = searchQuery.trim();
+        }
+
+        // Преобразуем выбранные уровни в формат API
+        if (selectedLevels.length > 0) {
+            // Безопасно берем первый элемент
+            const firstLevel = selectedLevels[0];
+            if (firstLevel && levelToApiMap[firstLevel]) {
+                params.education_level = levelToApiMap[firstLevel];
+            }
+        }
+
+        return params;
+    }, [selectedLevels, searchQuery]);
+
+    // Получаем данные с бэкенда
+    const { data: clubs = [], isLoading, error } = useClubs(apiParams);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
@@ -71,36 +56,49 @@ export default function HomePage() {
         );
     };
 
+    // Преобразуем данные API в формат для ClubCard
+    const clubCardsData = useMemo(() => {
+        return clubs.map(club => mapApiClubToCardData(club));
+    }, [clubs]);
+
+    // Дополнительная фильтрация на фронтенде (если нужно несколько уровней)
     const filteredClubs = useMemo(() => {
-        let filtered = clubsData;
-
-        // Фильтрация по уровню подготовки
-        if (selectedLevels.length > 0) {
-            filtered = filtered.filter(club => {
-                const clubLevel =
-                    club.skillLevel === 'начальный' ? 'beginner' :
-                        club.skillLevel === 'продвинутый' ? 'advanced' : 'gss';
-                return selectedLevels.includes(clubLevel as SkillLevel);
-            });
+        if (selectedLevels.length <= 1) {
+            return clubCardsData;
         }
 
-        // Фильтрация по поисковому запросу
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase().trim();
-            filtered = filtered.filter(club =>
-                club.title.toLowerCase().includes(query) ||
-                club.location.toLowerCase().includes(query) ||
-                club.workoutsPerWeek.toLowerCase().includes(query) ||
-                club.skillLevel.toLowerCase().includes(query)
-            );
-        }
+        return clubCardsData.filter(club => {
+            const clubLevel =
+                club.skillLevel === 'начальный' ? 'beginner' :
+                    club.skillLevel === 'продвинутый' ? 'advanced' : 'gss';
+            return selectedLevels.includes(clubLevel as SkillLevel);
+        });
+    }, [clubCardsData, selectedLevels]);
 
-        return filtered;
-    }, [selectedLevels, searchQuery]);
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-white">
+                <Navbar selectedButton={1} />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-gray-500">Загрузка клубов...</div>
+                </div>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="flex flex-col min-h-screen bg-white">
+                <Navbar selectedButton={1} />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-red-500">Ошибка загрузки данных</div>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-white">
-
             <div className="flex flex-col sticky top-0 bg-white z-10 gap-2 mb-2">
                 <Navbar selectedButton={1} />
                 <div className="w-full border-gray-100 flex flex-col justify-center px-20">
@@ -119,12 +117,12 @@ export default function HomePage() {
                     <div className="flex items-center gap-1">
                         <Checkbox
                             className="size-[20px] rounded-[7px]
-                           transition-all
-                           duration-200
-                           ease-in-out
-                           data-[state=checked]:bg-blue-500
-                           data-[state=checked]:text-white
-                           data-[state=checked]:border-blue-500"
+                         transition-all
+                         duration-200
+                         ease-in-out
+                         data-[state=checked]:bg-blue-500
+                         data-[state=checked]:text-white
+                         data-[state=checked]:border-blue-500"
                             checked={selectedLevels.includes('beginner')}
                             onCheckedChange={() => handleLevelChange('beginner')}
                         />
@@ -133,12 +131,12 @@ export default function HomePage() {
                     <div className="flex items-center gap-1">
                         <Checkbox
                             className="size-[20px] rounded-[7px]
-                           transition-all
-                           duration-200
-                           ease-in-out
-                           data-[state=checked]:bg-blue-500
-                           data-[state=checked]:text-white
-                           data-[state=checked]:border-blue-500"
+                         transition-all
+                         duration-200
+                         ease-in-out
+                         data-[state=checked]:bg-blue-500
+                         data-[state=checked]:text-white
+                         data-[state=checked]:border-blue-500"
                             checked={selectedLevels.includes('advanced')}
                             onCheckedChange={() => handleLevelChange('advanced')}
                         />
@@ -147,12 +145,12 @@ export default function HomePage() {
                     <div className="flex items-center gap-1">
                         <Checkbox
                             className="size-[20px] rounded-[7px]
-                           transition-all
-                           duration-200
-                           ease-in-out
-                           data-[state=checked]:bg-blue-500
-                           data-[state=checked]:text-white
-                           data-[state=checked]:border-blue-500"
+                         transition-all
+                         duration-200
+                         ease-in-out
+                         data-[state=checked]:bg-blue-500
+                         data-[state=checked]:text-white
+                         data-[state=checked]:border-blue-500"
                             checked={selectedLevels.includes('gss')}
                             onCheckedChange={() => handleLevelChange('gss')}
                         />
@@ -171,7 +169,7 @@ export default function HomePage() {
                 ) : (
                     <div className="grid grid-cols-3 gap-2">
                         {filteredClubs.map((club, index) => (
-                            <ClubCard key={index} clubData={club} />
+                            <ClubCard key={club.id || index} clubData={club} />
                         ))}
                     </div>
                 )}
