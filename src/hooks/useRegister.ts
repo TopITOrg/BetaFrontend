@@ -1,9 +1,7 @@
-'use client';
 import { useMutation } from '@tanstack/react-query';
 import api from '../lib/api';
 import { useRouter } from 'next/navigation';
-import { useAuth } from 'contexts/AuthContext';
-
+import { useAuth } from '../../contexts/AuthContext';
 
 interface RegisterData {
     full_name: string;

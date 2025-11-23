@@ -1,9 +1,8 @@
-"use client"
 import Image from "next/image";
 import Link from "next/link";
 import { LogIn, CircleUserRound, LogOut } from "lucide-react";
 import { CustomButton } from "./CustomButton";
-import { useAuth } from "../hooks/useAuthMock";
+import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 
 interface NavbarProps {
