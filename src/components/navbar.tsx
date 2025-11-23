@@ -37,12 +37,6 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
                         isSelected={selectedButton === 1}
                     />
                 </Link>
-                <Link href="/events">
-                    <CustomButton
-                        text="Мероприятия"
-                        isSelected={selectedButton === 2}
-                    />
-                </Link>
             </div>
 
             <Link
