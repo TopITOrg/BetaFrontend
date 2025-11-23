@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Profile } from "@/components/Profile";
 import { Navbar } from "@/components/navbar";
 import { useState } from "react";
+import { CustomButton } from "@/components/CustomButton";
 
 export default function HomePage() {
     return(
@@ -10,12 +11,15 @@ export default function HomePage() {
             <div className='flex flex-col sticky top-0 bg-white z-70'>
                 <Navbar></Navbar>
             </div>
-            <div className="flex flex-row gap-5 items-start">
+            <div className="flex flex-row gap-5 items-start mr-[25px]">
                 <div className='flex flex-row items-start'>
                     <Profile></Profile>
                 </div>
                 <div className="mt-[65px]">
                     <Schedule></Schedule>
+                    <div className="mt-10 flex justify-center">
+                        <CustomButton text="Создать расписание" isSelected = {false}/>
+                    </div>
                 </div>
             </div>
         </main>
