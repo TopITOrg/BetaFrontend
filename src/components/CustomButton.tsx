@@ -11,7 +11,7 @@ function CustomButton({
     width?: string; // Опциональный параметр для ширины
 } & React.ComponentProps<typeof Button>) {
 
-    const baseClasses = "rounded-xl border-2 font-bold transition-colors duration-400 ease-in-out h-[40px]";
+    const baseClasses = "rounded-xl border-2 font-bold transition-all hover:scale-105 duration-400 ease-in-out h-[40px]";
 
     const selectedClasses = isSelected
         ? "bg-blue-500 text-white border-blue-500 hover:bg-blue-600 hover:border-blue-600 hover:text-white"
