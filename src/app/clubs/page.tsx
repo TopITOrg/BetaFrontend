@@ -78,7 +78,7 @@ export default function HomePage() {
     if (isLoading) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={1} />
+                <Navbar selectedButton={2} />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="text-gray-500">Загрузка клубов...</div>
                 </div>

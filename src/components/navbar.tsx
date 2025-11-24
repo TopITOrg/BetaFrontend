@@ -39,14 +39,20 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
             <div className="gap-2 flex flex-row items-center absolute left-1/2 -translate-x-1/2">
                 <Link href="/">
                     <CustomButton
-                        text="Новости"
+                        text="Главная"
                         isSelected={selectedButton === 0}
+                    />
+                </Link>
+                <Link href="/news">
+                    <CustomButton
+                        text="Новости"
+                        isSelected={selectedButton === 1}
                     />
                 </Link>
                 <Link href="/clubs">
                     <CustomButton
-                        text="Спортивные клубы"
-                        isSelected={selectedButton === 1}
+                        text="Спортивные секции"
+                        isSelected={selectedButton === 2}
                     />
                 </Link>
             </div>
