@@ -25,6 +25,7 @@ export interface ClubData {
     location: string;
     workoutsPerWeek: string;
     skillLevel: string;
+    description: string
 }
 
 export const mapApiClubToCardData = (club: ClubFromAPI): ClubData => {
@@ -51,5 +52,6 @@ export const mapApiClubToCardData = (club: ClubFromAPI): ClubData => {
         location: club.Place,
         workoutsPerWeek: `${club.RequiredWorkoutPerWeek}`,
         skillLevel: mapEducationLevel(club.EducationLevel),
+        description: club.Description
     };
 };

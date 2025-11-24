@@ -76,7 +76,6 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
                                 <p className="text-sm text-gray-600">{user?.email}</p>
                             </div>
 
-                            {/* ДОБАВЛЕНА ССЫЛКА НА РЕДАКТИРОВАНИЕ ПРОФИЛЯ */}
                             <Link href="/edit">
                                 <button
                                     onClick={() => setIsDropdownOpen(false)}
