@@ -158,7 +158,7 @@ export default function HomePage() {
     return (
         <main className="flex flex-col min-h-screen bg-white">
             <div className="flex flex-col sticky top-0 bg-white gap-2 mb-2">
-                <Navbar selectedButton={1}></Navbar>
+                <Navbar></Navbar>
                 <div className="h-[40px] relative px-20">
                     <Input
                         placeholder="Поиск"

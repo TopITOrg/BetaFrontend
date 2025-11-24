@@ -3,17 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LogIn, CircleUserRound, LogOut, User } from "lucide-react";
-import { CustomButton } from "./CustomButton";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
+import { useActivePath } from "@/hooks/useActivePath";
 
-interface NavbarProps {
-    selectedButton?: number;
-}
-
-function Navbar({ selectedButton = 0 }: NavbarProps) {
+function Navbar() {
     const { isAuthenticated, user, logout } = useAuth();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const selectedButton = useActivePath(); // Автоматическое определение активной страницы
 
     const handleLogout = () => {
         logout();
@@ -21,7 +18,7 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
     };
 
     return (
-        <nav className="px-20 gap-2 pt-2 flex flex-row items-center justify-between w-full h-[70px] relative">
+        <nav className="px-20 gap-2 pt-2 flex flex-row items-center justify-between w-full h-[70px] relative border-b border-gray-200 bg-white">
             <div className="flex flex-row items-center gap-2">
                 <Image
                     src="/Default.svg"
@@ -30,7 +27,7 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
                     alt="logo"
                     className="text-blue-500 size-[8vh]"
                 />
-                <div className="">
+                <div className="font-semibold">
                     <h1>Спортивные</h1>
                     <h1>секции</h1>
                 </div>
@@ -38,22 +35,37 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
 
             <div className="gap-2 flex flex-row items-center absolute left-1/2 -translate-x-1/2">
                 <Link href="/">
-                    <CustomButton
-                        text="Главная"
-                        isSelected={selectedButton === 0}
-                    />
+                    <div className={`
+                        px-6 py-3 rounded-lg transition-all duration-300 font-medium
+                        ${selectedButton === 0
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
+                    }
+                    `}>
+                        Главная
+                    </div>
                 </Link>
                 <Link href="/news">
-                    <CustomButton
-                        text="Новости"
-                        isSelected={selectedButton === 1}
-                    />
+                    <div className={`
+                        px-6 py-3 rounded-lg transition-all duration-300 font-medium
+                        ${selectedButton === 1
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
+                    }
+                    `}>
+                        Новости
+                    </div>
                 </Link>
                 <Link href="/clubs">
-                    <CustomButton
-                        text="Спортивные секции"
-                        isSelected={selectedButton === 2}
-                    />
+                    <div className={`
+                        px-6 py-3 rounded-lg transition-all duration-300 font-medium
+                        ${selectedButton === 2
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
+                    }
+                    `}>
+                        Спортивные секции
+                    </div>
                 </Link>
             </div>
 
@@ -62,11 +74,12 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         className="flex flex-row items-center gap-2
-                                  rounded-[200px] hover:text-blue-500
-                                  transition-colors duration-400 ease-in-out"
+                                  px-4 py-2 rounded-lg
+                                  text-gray-600 hover:text-blue-500 hover:bg-blue-50
+                                  transition-all duration-300 ease-in-out font-medium"
                     >
                         <h1>{user?.full_name.split(' ')[0]}</h1>
-                        <CircleUserRound />
+                        <CircleUserRound size={20} />
                     </button>
 
                     {isDropdownOpen && (
@@ -79,7 +92,7 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
                             <Link href="/edit">
                                 <button
                                     onClick={() => setIsDropdownOpen(false)}
-                                    className="w-full flex items-center gap-2 p-3 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                                    className="w-full flex items-center gap-2 p-3 text-gray-700 hover:bg-blue-50 transition-colors duration-200"
                                 >
                                     <User size={16} />
                                     <span>Мой профиль</span>
@@ -88,7 +101,7 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
 
                             <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center gap-2 p-3 text-red-600 hover:bg-gray-50 transition-colors duration-200"
+                                className="w-full flex items-center gap-2 p-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
                             >
                                 <LogOut size={16} />
                                 <span>Выйти</span>
@@ -100,11 +113,12 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
                 <Link
                     href="/login"
                     className="flex flex-row items-center gap-2
-                              rounded-[200px] hover:text-blue-500
-                              transition-colors duration-400 ease-in-out"
+                              px-4 py-2 rounded-lg
+                              text-gray-600 hover:text-blue-500 hover:bg-blue-50
+                              transition-all duration-300 ease-in-out font-medium"
                 >
                     <h1>Войти</h1>
-                    <LogIn />
+                    <LogIn size={20} />
                 </Link>
             )}
         </nav>

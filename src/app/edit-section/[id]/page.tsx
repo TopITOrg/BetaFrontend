@@ -81,7 +81,7 @@ export default function EditSectionPage() {
     if (loading) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={-1} />
+                <Navbar/>
                 <div className="flex-1 flex items-center justify-center">
                     <div className="text-lg">Загрузка...</div>
                 </div>
@@ -92,7 +92,7 @@ export default function EditSectionPage() {
     if (error || !club) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={-1} />
+                <Navbar/>
                 <div className="flex-1 flex flex-col items-center justify-center gap-4">
                     <div className="text-lg text-red-500">{error || 'Секция не найдена'}</div>
                     <button
@@ -108,7 +108,7 @@ export default function EditSectionPage() {
 
     return (
         <main className="flex flex-col min-h-screen bg-white">
-            <Navbar selectedButton={-1} />
+            <Navbar/>
 
             <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
                 <div className="flex justify-between items-center mb-8">

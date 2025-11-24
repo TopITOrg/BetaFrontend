@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar"
 export default function HomePage() {
     return (
         <main className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-            <Navbar selectedButton={0} />
+            <Navbar/>
             <div className="flex items-center justify-center h-[calc(100vh-70px)] gap-8 flex-col px-20 text-center">
                 <div className="text-5xl lg:text-7xl font-bold bg-gradient-to-r from-blue-600 to-purple-700 bg-clip-text text-transparent">
                     Спорт без границ

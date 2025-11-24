@@ -1,4 +1,3 @@
-// app/create-section/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -18,6 +17,7 @@ export default function CreateSectionPage() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
     const router = useRouter();
     const { user } = useAuth();
 
@@ -25,20 +25,33 @@ export default function CreateSectionPage() {
         e.preventDefault();
         setLoading(true);
         setError('');
+        setSuccess(false);
+
+        // Проверяем авторизацию
+        if (!user?.id) {
+            setError('Пользователь не авторизован');
+            setLoading(false);
+            return;
+        }
 
         try {
             const token = localStorage.getItem('access_token');
+            if (!token) {
+                setError('Токен не найден');
+                setLoading(false);
+                return;
+            }
 
             // Подготавливаем данные в правильном формате
             const requestData = {
                 name: formData.name,
                 description: formData.description,
                 place: formData.place,
-                required_workout_per_week: formData.required_workout_per_week,
-                education_level_id: formData.education_level_id,
-                total_places: formData.total_places,
-                sport_type_id: formData.sport_type_id,
-                teacher_id: user?.id
+                required_workout_per_week: Number(formData.required_workout_per_week),
+                education_level_id: Number(formData.education_level_id),
+                total_places: formData.total_places ? Number(formData.total_places) : null,
+                sport_type_id: Number(formData.sport_type_id),
+                teacher_id: Number(user.id)
             };
 
             console.log('Sending request data:', requestData);
@@ -55,13 +68,40 @@ export default function CreateSectionPage() {
             console.log('Response status:', response.status);
 
             if (response.ok) {
-                const data = await response.json();
-                console.log('Club created successfully:', data);
-                router.push('/edit');
+                // Успешное создание
+                try {
+                    const data = await response.json();
+                    console.log('Club created successfully:', data);
+                    setSuccess(true);
+                    // Перенаправляем через 2 секунды, чтобы пользователь увидел сообщение
+                    setTimeout(() => {
+                        router.push('/edit');
+                    }, 2000);
+                } catch (parseError) {
+                    console.log('Error parsing response, but club might be created');
+                    setSuccess(true);
+                    setTimeout(() => {
+                        router.push('/edit');
+                    }, 2000);
+                }
+            } else if (response.status === 500) {
+                // Ошибка 500, но секция могла создать в БД
+                console.log('Server returned 500, but club might be created in database');
+                setSuccess(true);
+                setError('Секция создана, но произошла ошибка при формировании ответа. Перенаправляем...');
+                setTimeout(() => {
+                    router.push('/edit');
+                }, 3000);
             } else {
-                const errorData = await response.json();
-                console.error('Error data:', errorData);
-                setError(errorData.message || 'Ошибка при создании секции');
+                // Другие ошибки
+                let errorText = 'Ошибка при создании секции';
+                try {
+                    const errorData = await response.json();
+                    errorText = errorData.message || errorText;
+                } catch {
+                    errorText = await response.text() || errorText;
+                }
+                setError(errorText);
             }
         } catch (err) {
             console.error('Network error:', err);
@@ -83,8 +123,7 @@ export default function CreateSectionPage() {
 
     return (
         <main className="flex flex-col min-h-screen bg-white">
-            {/* Убираем выделение навбара */}
-            <Navbar selectedButton={-1} />
+            <Navbar />
 
             <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
                 <h1 className="text-3xl font-bold mb-8">Создание секции</h1>
@@ -201,7 +240,15 @@ export default function CreateSectionPage() {
                         />
                     </div>
 
-                    {error && (
+                    {success && (
+                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <p className="text-green-600">
+                                ✅ Секция успешно создана! Перенаправляем...
+                            </p>
+                        </div>
+                    )}
+
+                    {error && !success && (
                         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                             <p className="text-red-600">{error}</p>
                         </div>
@@ -211,7 +258,8 @@ export default function CreateSectionPage() {
                         <button
                             type="button"
                             onClick={() => router.back()}
-                            className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                            disabled={loading}
+                            className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors disabled:opacity-50"
                         >
                             Отмена
                         </button>

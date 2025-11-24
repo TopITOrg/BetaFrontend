@@ -7,7 +7,7 @@ export default function EditProfilePage() {
     return (
         <main>
             <div className='flex flex-col sticky top-0 bg-white z-70'>
-                <Navbar selectedButton={-1}></Navbar>
+                <Navbar></Navbar>
             </div>
             <div className="flex flex-rows">
                 <div className="w-1/3"><Profile/></div>
