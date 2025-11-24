@@ -21,7 +21,7 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
     };
 
     return (
-        <nav className="px-2 gap-2 pt-2 flex flex-row items-center justify-between w-full h-[70px] relative">
+        <nav className="px-20 gap-2 pt-2 flex flex-row items-center justify-between w-full h-[70px] relative">
             <div className="flex flex-row items-center gap-2">
                 <Image
                     src="/Default.svg"
