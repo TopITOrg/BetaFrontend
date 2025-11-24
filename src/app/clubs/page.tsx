@@ -55,7 +55,7 @@ export default function ClubsPage() {
     if (loading) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={1} />
+                <Navbar selectedButton={2} />
                 <div className="flex justify-center items-center h-64">
                     <div className="text-lg">Загрузка клубов...</div>
                 </div>
