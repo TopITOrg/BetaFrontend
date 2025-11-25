@@ -40,7 +40,9 @@ export function EditProfileForm() {
                     if (isNaN(date.getTime())) {
                         return '';
                     }
-                    return date.toISOString().split('T')[0];
+                    // Исправленная строка - добавляем проверку на undefined
+                    const isoString = date.toISOString();
+                    return isoString.split('T')[0] || '';
                 } catch {
                     return '';
                 }
