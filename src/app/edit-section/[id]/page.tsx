@@ -1,3 +1,4 @@
+// src/app/edit-section/[id]/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,6 +7,7 @@ import { Navbar } from '@/components/navbar';
 import { Profile } from '@/components/Profile';
 import { useClub } from '@/hooks/useTeacherClubs';
 import { Input } from '@/components/ui/input';
+import { CustomButton } from '@/components/CustomButton';
 import { Tag, FileText, MapPin, User, Calendar, GraduationCap, Users, Activity } from "lucide-react";
 
 interface FormData {
@@ -171,12 +173,11 @@ export default function EditSectionPage() {
                 <Navbar/>
                 <div className="flex-1 flex flex-col items-center justify-center gap-4">
                     <div className="text-lg text-red-500">{error || 'Секция не найдена'}</div>
-                    <button
+                    <CustomButton
+                        text="Назад к профилю"
+                        isSelected={false}
                         onClick={() => router.push('/edit')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                    >
-                        Назад к профилю
-                    </button>
+                    />
                 </div>
             </main>
         );
@@ -194,13 +195,13 @@ export default function EditSectionPage() {
                 <div className="flex-1 p-8 max-w-2xl">
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-black font-bold text-4xl">Редактирование секции</h1>
-                        <button
+                        <CustomButton
+                            text={deleteLoading ? 'Удаление...' : 'Удалить секцию'}
+                            isSelected={false}
                             onClick={() => setShowDeleteConfirm(true)}
                             disabled={deleteLoading}
-                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
-                        >
-                            {deleteLoading ? 'Удаление...' : 'Удалить секцию'}
-                        </button>
+                            className="bg-red-500 border-red-500 text-white hover:bg-red-600 hover:border-red-600"
+                        />
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4 w-full max-w-md">
@@ -212,7 +213,7 @@ export default function EditSectionPage() {
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
-                                disabled={loading}
+                                disabled={updating}
                                 required
                             />
                             <Tag className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
@@ -227,7 +228,7 @@ export default function EditSectionPage() {
                   onChange={handleInputChange}
                   rows={4}
                   className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2 resize-none"
-                  disabled={loading}
+                  disabled={updating}
                   required
               />
                             <FileText className="absolute right-3 top-3 text-gray-500" size={20}/>
@@ -241,7 +242,7 @@ export default function EditSectionPage() {
                                 value={formData.place}
                                 onChange={handleInputChange}
                                 className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
-                                disabled={loading}
+                                disabled={updating}
                                 required
                             />
                             <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
@@ -267,7 +268,7 @@ export default function EditSectionPage() {
                                 value={formData.required_workout_per_week}
                                 onChange={handleInputChange}
                                 className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
-                                disabled={loading}
+                                disabled={updating}
                                 required
                                 min="1"
                             />
@@ -294,7 +295,7 @@ export default function EditSectionPage() {
                                 value={formData.total_places || ''}
                                 onChange={handleInputChange}
                                 className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
-                                disabled={loading}
+                                disabled={updating}
                                 min="1"
                             />
                             <Users className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
@@ -318,27 +319,20 @@ export default function EditSectionPage() {
                         )}
 
                         <div className="flex gap-3 w-full justify-center">
-                            <button
+                            <CustomButton
+                                text={updating ? 'Сохранение...' : 'Сохранить изменения'}
+                                isSelected={true}
                                 type="submit"
                                 disabled={updating}
-                                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
-                                {updating ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        <span>Сохранение...</span>
-                                    </>
-                                ) : (
-                                    'Сохранить изменения'
-                                )}
-                            </button>
-                            <button
+                                width="200px"
+                            />
+                            <CustomButton
+                                text="Отмена"
+                                isSelected={false}
                                 type="button"
                                 onClick={() => router.push('/edit')}
-                                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                            >
-                                Отмена
-                            </button>
+                                width="120px"
+                            />
                         </div>
                     </form>
                 </div>
@@ -353,20 +347,21 @@ export default function EditSectionPage() {
                             Вы уверены, что хотите удалить секцию "{club.name}"? Это действие нельзя отменить.
                         </p>
                         <div className="flex gap-3 justify-end">
-                            <button
+                            <CustomButton
+                                text="Отмена"
+                                isSelected={false}
                                 onClick={() => setShowDeleteConfirm(false)}
                                 disabled={deleteLoading}
-                                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors disabled:opacity-50"
-                            >
-                                Отмена
-                            </button>
-                            <button
+                                width="100px"
+                            />
+                            <CustomButton
+                                text={deleteLoading ? 'Удаление...' : 'Удалить'}
+                                isSelected={false}
                                 onClick={handleDelete}
                                 disabled={deleteLoading}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
-                            >
-                                {deleteLoading ? 'Удаление...' : 'Удалить'}
-                            </button>
+                                className="bg-red-500 border-red-500 text-white hover:bg-red-600 hover:border-red-600"
+                                width="100px"
+                            />
                         </div>
                     </div>
                 </div>
