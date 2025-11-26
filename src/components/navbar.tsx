@@ -22,17 +22,17 @@ function Navbar({ selectedButton = 0 }: NavbarProps) {
 
     return (
         <nav className="px-20 gap-2 pt-2 flex flex-row items-center justify-between w-full h-[70px] relative">
-            <div className="flex flex-row items-center gap-2">
+            <div className="flex flex-row items-center gap-1">
                 <Image
-                    src="/Default.svg"
+                    src="/Logo.jpg"
                     width={40}
                     height={40}
                     alt="logo"
-                    className="text-blue-500 size-[8vh]"
+                    className="text-blue-500 size-[50px]"
                 />
-                <div className="">
-                    <h1>Спортивные</h1>
-                    <h1>секции</h1>
+                <div className="text-sm">
+                    <h1>Спортивное</h1>
+                    <h1>движение</h1>
                 </div>
             </div>
 
