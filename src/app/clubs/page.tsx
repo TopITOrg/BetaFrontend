@@ -1,3 +1,4 @@
+// app/clubs/page.tsx
 "use client"
 
 import {Search} from "lucide-react";
@@ -7,6 +8,7 @@ import { Navbar } from "@/components/navbar"
 import { ClubCard } from "@/components/ClubCard"
 import { useState, useMemo } from "react";
 import { useClubs } from "@/hooks/useClubs";
+import { CustomButton } from "@/components/CustomButton";
 
 type SkillLevel = 'beginner' | 'advanced' | 'gss';
 
@@ -45,7 +47,8 @@ export default function ClubsPage() {
                 club.title.toLowerCase().includes(query) ||
                 club.location.toLowerCase().includes(query) ||
                 club.workoutsPerWeek.toLowerCase().includes(query) ||
-                club.skillLevel.toLowerCase().includes(query)
+                club.skillLevel.toLowerCase().includes(query) ||
+                club.sportType?.toLowerCase().includes(query)
             );
         }
 
@@ -55,7 +58,7 @@ export default function ClubsPage() {
     if (loading) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={2} />
+                <Navbar />
                 <div className="flex justify-center items-center h-64">
                     <div className="text-lg">Загрузка клубов...</div>
                 </div>
@@ -66,17 +69,16 @@ export default function ClubsPage() {
     if (error && clubs.length === 0) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={1} />
+                <Navbar />
                 <div className="flex flex-col justify-center items-center h-64 gap-4">
                     <div className="text-red-500 text-lg text-center">
                         Не удалось загрузить данные о секциях
                     </div>
-                    <button
+                    <CustomButton
+                        text="Попробовать снова"
+                        isSelected={false}
                         onClick={refetch}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                        Попробовать снова
-                    </button>
+                    />
                 </div>
             </main>
         );
@@ -85,7 +87,7 @@ export default function ClubsPage() {
     return (
         <main className="flex flex-col min-h-screen bg-white">
             <div className="flex flex-col sticky top-0 bg-white z-10 gap-2 mb-2">
-                <Navbar selectedButton={1} />
+                <Navbar />
                 <div className="w-full border-gray-100 flex flex-col justify-center px-20">
                     <div className="h-[40px] relative">
                         <Input

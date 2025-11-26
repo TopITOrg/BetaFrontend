@@ -1,5 +1,5 @@
+// hooks/useClubs.ts
 import { useState, useEffect } from 'react';
-import type { ClubData } from '@/components/ClubCard';
 
 export interface ClubFromBackend {
     ID: number;
@@ -16,6 +16,17 @@ export interface ClubFromBackend {
     RequiredWorkoutPerWeek: number;
     CreatedAt: string;
     UpdatedAt: string;
+}
+
+export interface ClubData {
+    id?: number;
+    title: string;
+    availableSpots: string;
+    location: string;
+    workoutsPerWeek: string;
+    skillLevel: string;
+    description: string;
+    sportType: string; // Добавлено новое поле
 }
 
 interface UseClubsResult {
@@ -54,13 +65,16 @@ export const useClubs = (): UseClubsResult => {
 
             if (data.clubs && Array.isArray(data.clubs)) {
                 const transformedClubs: ClubData[] = data.clubs.map((club: ClubFromBackend) => {
+                    const availableSpots = club.TotalPlaces ? `${club.TotalPlaces}` : '0';
+
                     return {
                         title: club.Name,
-                        availableSpots: club.TotalPlaces ? `${club.TotalPlaces}` : '0',
+                        availableSpots: availableSpots,
                         location: club.Place,
                         workoutsPerWeek: club.RequiredWorkoutPerWeek.toString(),
                         skillLevel: club.EducationLevel,
-                        description: club.Description, // Оставляем описание
+                        description: club.Description,
+                        sportType: club.SportType, // Добавлено
                         id: club.ID
                     };
                 });
