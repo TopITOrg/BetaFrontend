@@ -24,7 +24,7 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
     const [selectedClubId, setSelectedClubId] = useState<number | null>(null);
-    const [selectedClubName, setSelectedClubName] = useState<string>('Все секции');
+    const [selectedClubName, setSelectedClubName] = useState<string>('Выберите секцию');
     const [creatingWorkout, setCreatingWorkout] = useState(false);
     const [showMenuForWorkout, setShowMenuForWorkout] = useState<number | null>(null);
     const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
@@ -70,10 +70,10 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
     // Обновляем название выбранной секции при изменении selectedClubId
     useEffect(() => {
         if (selectedClubId === null) {
-            setSelectedClubName('Все секции');
+            setSelectedClubName('Выберите секцию');
         } else {
             const club = clubsWithId.find(c => c.id === selectedClubId);
-            setSelectedClubName(club ? club.title : 'Все секции');
+            setSelectedClubName(club ? club.title : 'Выберите секцию');
         }
     }, [selectedClubId, clubsWithId]);
 
@@ -231,7 +231,7 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
     const showClubSelector = isAdmin || isTeacher || isStudent;
 
     return (
-        <div className="w-full max-w-[100%] -ml-14 -mr-2">
+        <div className="w-full max-w-[100%] -ml-17 mr-1">
             <div className="mb-4">
                 <h1 className="text-xl font-bold text-gray-900">Тренировки</h1>
                 <span className="text-gray-600 text-sm">{currentMonth}</span>
@@ -257,7 +257,7 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-[190px]">
                             <DropdownMenuItem onClick={() => setSelectedClubId(null)}>
-                                Все секции
+                                Выберите секцию
                             </DropdownMenuItem>
                             {clubsWithId.map((club) => (
                                 <DropdownMenuItem

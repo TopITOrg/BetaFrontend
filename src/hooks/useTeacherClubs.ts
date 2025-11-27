@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useAuth} from '../../contexts/AuthContext';
+import api from '../lib/api';
 
 export interface TeacherClub {
     id: number;
@@ -7,6 +8,7 @@ export interface TeacherClub {
     description: string;
     sport_type: string;
     teacher: string;
+    teacher_id: number; // Добавляем teacher_id
     total_places: number | null;
     place: string;
     education_level: string;
@@ -26,52 +28,42 @@ export const useTeacherClubs = (): UseTeacherClubsResult => {
     const [error, setError] = useState<string | null>(null);
     const {user} = useAuth();
 
-    // hooks/useTeacherClubs.ts
     const fetchTeacherClubs = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('http://localhost:8080/clubs/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    limit: 1000,
-                    offset: 0
-                }),
+            const response = await api.post('/clubs/', {
+                limit: 1000,
+                offset: 0
             });
 
-            if (!response.ok) {
-                throw new Error(`Ошибка загрузки: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('All clubs data:', data);
+            const data = response.data;
+            console.log('All clubs from server:', data.clubs); // Для отладки
 
             if (data.clubs && Array.isArray(data.clubs)) {
-                console.log('Current user ID:', user?.id);
-
+                // Правильно маппим поля из ответа сервера
                 const teacherClubs: TeacherClub[] = data.clubs
                     .filter((club: any) => {
-                        console.log(`Checking club: ${club.Name}, TeacherID: ${club.TeacherID}, User ID: ${user?.id}`);
-                        return club.TeacherID === user?.id;
+                        // Проверяем разные возможные названия полей
+                        const teacherId = club.TeacherID || club.teacher_id || club.teacherId;
+                        console.log(`Club ${club.Name}: TeacherID = ${teacherId}, User ID = ${user?.id}`); // Для отладки
+                        return teacherId === user?.id;
                     })
                     .map((club: any) => ({
-                        id: club.ID,
-                        name: club.Name,
-                        description: club.Description,
-                        sport_type: club.SportType,
-                        teacher: club.Teacher,
-                        teacher_id: club.TeacherID,
-                        total_places: club.TotalPlaces,
-                        place: club.Place,
-                        education_level: club.EducationLevel,
-                        required_workout_per_week: club.RequiredWorkoutPerWeek
+                        id: club.ID || club.id,
+                        name: club.Name || club.name,
+                        description: club.Description || club.description,
+                        sport_type: club.SportType || club.sport_type,
+                        teacher: club.Teacher || club.teacher,
+                        teacher_id: club.TeacherID || club.teacher_id || club.teacherId,
+                        total_places: club.TotalPlaces || club.total_places,
+                        place: club.Place || club.place,
+                        education_level: club.EducationLevel || club.education_level,
+                        required_workout_per_week: club.RequiredWorkoutPerWeek || club.required_workout_per_week
                     }));
 
-                console.log('Filtered teacher clubs:', teacherClubs);
+                console.log('Filtered teacher clubs:', teacherClubs); // Для отладки
                 setClubs(teacherClubs);
             } else {
                 throw new Error('Неверный формат данных от сервера');

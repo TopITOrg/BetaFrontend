@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import type { ClubData } from '@/components/ClubCard';
+import {useEffect, useState} from 'react';
+import type {ClubData} from '@/components/ClubCard';
+import {useAuth} from '../../contexts/AuthContext';
 
 export interface ClubFromBackend {
     ID: number;
@@ -29,16 +30,34 @@ export const useClubs = (): UseClubsResult => {
     const [clubs, setClubs] = useState<ClubData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const {user, isAuthenticated} = useAuth();
 
     const fetchClubs = async () => {
         try {
             setLoading(true);
             setError(null);
 
+            // Проверяем аутентификацию
+            if (!isAuthenticated) {
+                setError('Пользователь не авторизован');
+                setLoading(false);
+                return;
+            }
+
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                setError('Токен авторизации не найден');
+                setLoading(false);
+                return;
+            }
+
+            console.log('Sending clubs request with token:', token); // Debug log
+
             const response = await fetch('http://localhost:8080/clubs/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     limit: 100,
@@ -46,11 +65,19 @@ export const useClubs = (): UseClubsResult => {
                 }),
             });
 
+            console.log('Clubs response status:', response.status); // Debug log
+
             if (!response.ok) {
-                throw new Error(`Ошибка загрузки: ${response.status}`);
+                if (response.status === 401) {
+                    setError('Ошибка авторизации');
+                } else {
+                    throw new Error(`Ошибка загрузки: ${response.status}`);
+                }
+                return;
             }
 
             const data = await response.json();
+            console.log('Clubs data received:', data); // Debug log
 
             if (data.clubs && Array.isArray(data.clubs)) {
                 const transformedClubs: ClubData[] = data.clubs.map((club: ClubFromBackend) => {
@@ -60,7 +87,7 @@ export const useClubs = (): UseClubsResult => {
                         location: club.Place,
                         workoutsPerWeek: club.RequiredWorkoutPerWeek.toString(),
                         skillLevel: club.EducationLevel,
-                        description: club.Description, // Оставляем описание
+                        description: club.Description,
                         id: club.ID
                     };
                 });
@@ -79,8 +106,13 @@ export const useClubs = (): UseClubsResult => {
     };
 
     useEffect(() => {
-        fetchClubs();
-    }, []);
+        if (isAuthenticated) {
+            fetchClubs();
+        } else {
+            setLoading(false);
+            setError('Пользователь не авторизован');
+        }
+    }, [isAuthenticated]);
 
     return {
         clubs,

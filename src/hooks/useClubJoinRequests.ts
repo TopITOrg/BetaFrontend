@@ -6,12 +6,13 @@ export interface ClubJoinRequest {
     club_name: string;
     user_id: number;
     user_name: string;
-    status: string;
+    status: string; 
     created_at: string;
     updated_at: string;
 }
 
-interface UseClubJoinRequestsParams {
+// Добавляем экспорт интерфейсов параметров и результата
+export interface UseClubJoinRequestsParams {
     club_id?: number;
     user_id?: number;
     status?: string;
@@ -19,7 +20,7 @@ interface UseClubJoinRequestsParams {
     offset?: number;
 }
 
-interface UseClubJoinRequestsResult {
+export interface UseClubJoinRequestsResult {
     requests: ClubJoinRequest[];
     loading: boolean;
     error: string | null;
@@ -31,7 +32,7 @@ export const useClubJoinRequests = (params: UseClubJoinRequestsParams = {}): Use
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchRequests = async () => {
+    const fetchRequests = async (): Promise<void> => {
         try {
             setLoading(true);
             setError(null);
@@ -42,17 +43,18 @@ export const useClubJoinRequests = (params: UseClubJoinRequestsParams = {}): Use
             }
 
             const queryParams = new URLSearchParams();
-            if (params.club_id) queryParams.append('club_id', params.club_id.toString());
-            if (params.user_id) queryParams.append('user_id', params.user_id.toString());
+            if (params.club_id !== undefined) queryParams.append('club_id', params.club_id.toString());
+            if (params.user_id !== undefined) queryParams.append('user_id', params.user_id.toString());
             if (params.status) queryParams.append('status', params.status);
-            if (params.limit) queryParams.append('limit', params.limit.toString());
-            if (params.offset) queryParams.append('offset', params.offset.toString());
+            if (params.limit !== undefined) queryParams.append('limit', params.limit.toString());
+            if (params.offset !== undefined) queryParams.append('offset', params.offset.toString());
 
-            const response = await fetch(`http://localhost:8080/club-join-requests/get?${queryParams}`, {
+            const url = `http://localhost:8080/club-join-requests/get?${queryParams}`;
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
                 },
             });
 
@@ -61,7 +63,20 @@ export const useClubJoinRequests = (params: UseClubJoinRequestsParams = {}): Use
             }
 
             const data = await response.json();
-            setRequests(data.club_join_requests || []);
+
+            // Преобразуем данные из серверного формата в наш формат
+            const formattedRequests: ClubJoinRequest[] = (data.club_join_requests || []).map((serverRequest: any) => ({
+                id: serverRequest.ID,
+                club_id: serverRequest.ClubID,
+                club_name: serverRequest.ClubName,
+                user_id: serverRequest.UserID,
+                user_name: serverRequest.UserName,
+                status: serverRequest.Status,
+                created_at: serverRequest.CreatedAt,
+                updated_at: serverRequest.UpdatedAt,
+            }));
+
+            setRequests(formattedRequests);
         } catch (err) {
             console.error('Ошибка при загрузке заявок:', err);
             setError('Не удалось загрузить данные о заявках');

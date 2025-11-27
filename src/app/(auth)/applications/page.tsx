@@ -4,23 +4,23 @@ import {Navbar} from "@/components/navbar";
 import {Profile} from "@/components/Profile";
 import {useAuth} from "../../../../contexts/AuthContext";
 import {type ClubJoinRequest, useClubJoinRequests} from "@/hooks/useClubJoinRequests";
-import {useUpdateClubJoinRequest} from "@/hooks/useUpdateClubJoinRequest";
 import {useTeacherClubs} from "@/hooks/useTeacherClubs";
 import {useMemo, useState} from "react";
+import {useUpdateClubJoinRequest} from "@/hooks/useUpdateClubJoinRequest";
 
 export default function ApplicationsPage() {
     const {user} = useAuth();
     const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
 
     const {updateRequest, loading: updateLoading} = useUpdateClubJoinRequest();
-    const {clubs: teacherClubs} = useTeacherClubs();
+    const {clubs: teacherClubs, loading: teacherClubsLoading} = useTeacherClubs();
 
     // Для студента - его заявки
     const studentRequests = useClubJoinRequests(
         user?.role?.toLowerCase() === 'student' ? {user_id: user?.id} : {}
     );
 
-    // Для тренера - заявки в его секции
+    // Для тренера - все заявки (будем фильтровать на фронтенде)
     const teacherRequests = useClubJoinRequests(
         user?.role?.toLowerCase() === 'teacher' ? {} : {}
     );
@@ -33,18 +33,22 @@ export default function ApplicationsPage() {
     // Фильтруем заявки для тренера (только его секции)
     const filteredTeacherRequests = useMemo(() => {
         if (user?.role?.toLowerCase() !== 'teacher') return [];
+        if (teacherClubsLoading) return [];
 
         const teacherClubIds = teacherClubs.map(club => club.id);
         return teacherRequests.requests.filter(request =>
             teacherClubIds.includes(request.club_id)
         );
-    }, [teacherRequests.requests, teacherClubs, user?.role]);
+    }, [teacherRequests.requests, teacherClubs, user?.role, teacherClubsLoading]);
 
     // Выбираем правильный набор заявок в зависимости от роли
     const getRequests = (): ClubJoinRequest[] => {
         switch (user?.role?.toLowerCase()) {
             case 'student':
-                return studentRequests.requests;
+                return studentRequests.requests.filter(request =>
+                    request.user_id === user?.id
+                );
+
             case 'teacher':
                 return filteredTeacherRequests;
             case 'admin':
@@ -59,7 +63,7 @@ export default function ApplicationsPage() {
             case 'student':
                 return studentRequests.loading;
             case 'teacher':
-                return teacherRequests.loading;
+                return teacherRequests.loading || teacherClubsLoading;
             case 'admin':
                 return adminRequests.loading;
             default:
@@ -180,7 +184,7 @@ export default function ApplicationsPage() {
                                         request={request}
                                         onApprove={() => handleApprove(request.id)}
                                         onReject={() => handleReject(request.id)}
-                                        onWithdraw={() => handleWithdraw(request.id)}
+                                        onWithdraw={user?.role?.toLowerCase() === 'student' ? () => handleWithdraw(request.id) : undefined}
                                         isProcessing={processingRequestId === request.id && updateLoading}
                                     />
                                 ))}

@@ -1,99 +1,130 @@
-'use client';
-import { CircleUserRound } from "lucide-react";
-import { Button } from "./ui/button";
-import { useAuth } from "../../contexts/AuthContext";
+import type {ClubJoinRequest} from '@/hooks/useClubJoinRequests';
 
 interface ApplicationProps {
-    request: {
-        id: number;
-        club_id: number;
-        club_name: string;
-        user_id: number;
-        user_name: string;
-        status: string;
-        created_at: string;
-        updated_at: string;
-    };
-    onApprove?: () => void;
-    onReject?: () => void;
+    request: ClubJoinRequest;
+    onApprove: () => void;
+    onReject: () => void;
     onWithdraw?: () => void;
-    isProcessing?: boolean;
+    isProcessing: boolean;
 }
 
-export function Application({ request, onApprove, onReject, onWithdraw, isProcessing = false }: ApplicationProps) {
-    const { user } = useAuth();
-    const isStudent = user?.role?.toLowerCase() === 'student';
-    const isTeacherOrAdmin = user?.role?.toLowerCase() === 'teacher' || user?.role?.toLowerCase() === 'admin';
+export const Application: React.FC<ApplicationProps> = ({
+                                                            request,
+                                                            onApprove,
+                                                            onReject,
+                                                            onWithdraw,
+                                                            isProcessing
+                                                        }) => {
+    const getStatusColor = () => {
+        switch (request.status.toLowerCase()) {
+            case 'approved':
+                return 'border-green-400';
+            case 'rejected':
+                return 'border-red-400';
+            case 'deleted':
+                return 'border-gray-400';
+            default:
+                return 'border-blue-400';
+        }
+    };
 
-    // Для студента показываем название секции, для тренера/админа - имя студента
-    const displayName = isStudent ? request.club_name : request.user_name;
+    const getStatusText = () => {
+        switch (request.status.toLowerCase()) {
+            case 'approved':
+                return 'Принята';
+            case 'rejected':
+                return 'Отклонена';
+            case 'deleted':
+                return 'Отозвана';
+            default:
+                return 'На рассмотрении';
+        }
+    };
+
+    // Исправляем проверку статуса - приводим к нижнему регистру
+    const canModify = request.status.toLowerCase() === 'submitted';
 
     return (
-        <div className="flex flex-col border-2 border-gray-300 rounded-xl h-[130px] w-[316px]">
-            <div className="flex items-center space-x-2 justify-center mt-2 px-2">
-                <CircleUserRound className="text-blue-500" size={40}/>
-                <span className="text-lg text-center truncate">{displayName}</span>
+        <div className={`border-2 rounded-xl p-6 w-80 shadow-lg transition-all duration-200 hover:shadow-xl bg-white ${getStatusColor()}`}>
+            {/* Заголовок */}
+            <div className="text-center mb-4">
+                <h3 className="font-bold text-xl text-gray-800">Заявка в секцию</h3>
+                <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2 ${
+                    request.status.toLowerCase() === 'approved' ? 'bg-green-100 text-green-800 border border-green-300' :
+                        request.status.toLowerCase() === 'rejected' ? 'bg-red-100 text-red-800 border border-red-300' :
+                            request.status.toLowerCase() === 'deleted' ? 'bg-gray-100 text-gray-800 border border-gray-300' :
+                                'bg-blue-100 text-blue-800 border border-blue-300'
+                }`}>
+                    {getStatusText()}
+                </div>
             </div>
 
-            {/* Статус заявки */}
-            <div className="text-center text-sm text-gray-600 mt-1">
-                Статус: {getStatusText(request.status)}
+            {/* Информация о заявке */}
+            <div className="space-y-3 mb-6">
+                <div>
+                    <p className="text-sm text-gray-600">Секция</p>
+                    <p className="font-semibold text-lg text-gray-800">{request.club_name}</p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-600">Подана пользователем</p>
+                    <p className="font-medium text-gray-800">{request.user_name}</p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-600">Дата подачи</p>
+                    <p className="text-sm text-gray-700">{new Date(request.created_at).toLocaleDateString('ru-RU')}</p>
+                </div>
             </div>
 
-            <div className="flex flex-row justify-center mt-3 gap-3 px-2">
-                {isTeacherOrAdmin && request.status === 'submitted' && (
-                    <>
-                        <Button
-                            className="rounded-3xl text-white bg-[#69BE62] text-sm hover:bg-green-600
-                            transition-colors duration-400 ease-in-out h-[40px] w-[120px]"
-                            onClick={onApprove}
-                            disabled={isProcessing}
-                        >
-                            {isProcessing ? 'Обработка...' : 'Принять'}
-                        </Button>
-                        <Button
-                            className="rounded-3xl text-white bg-[#FF3131] text-sm hover:bg-red-600
-                            transition-colors duration-400 ease-in-out h-[40px] w-[120px]"
-                            onClick={onReject}
-                            disabled={isProcessing}
-                        >
-                            {isProcessing ? 'Обработка...' : 'Отклонить'}
-                        </Button>
-                    </>
-                )}
-
-                {isStudent && request.status === 'submitted' && (
-                    <Button
-                        className="rounded-3xl text-white bg-[#FF3131] text-sm hover:bg-red-600
-                        transition-colors duration-400 ease-in-out h-[40px] w-[120px]"
-                        onClick={onWithdraw}
-                        disabled={isProcessing}
+            {/* Кнопки действий */}
+            {onWithdraw ? (
+                // Для студента - кнопка отзыва
+                <button
+                    className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                        canModify
+                            ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    onClick={onWithdraw}
+                    disabled={isProcessing || !canModify}
+                >
+                    {isProcessing ? 'Обработка...' : 'Отозвать заявку'}
+                </button>
+            ) : (
+                // Для тренера/админа - кнопки принятия/отклонения
+                <div className="flex gap-3">
+                    <button
+                        className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
+                            canModify
+                                ? 'bg-green-500 hover:bg-green-600 text-white'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                        onClick={onApprove}
+                        disabled={isProcessing || !canModify}
                     >
-                        {isProcessing ? 'Отзыв...' : 'Отозвать'}
-                    </Button>
-                )}
+                        {isProcessing ? '...' : 'Принять'}
+                    </button>
+                    <button
+                        className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
+                            canModify
+                                ? 'bg-red-500 hover:bg-red-600 text-white'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                        onClick={onReject}
+                        disabled={isProcessing || !canModify}
+                    >
+                        {isProcessing ? '...' : 'Отклонить'}
+                    </button>
+                </div>
+            )}
 
-                {/* Для завершенных заявок показываем статус */}
-                {request.status !== 'submitted' && (
-                    <div className={`text-sm font-medium px-3 py-2 rounded-full ${
-                        request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                            request.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                'bg-gray-100 text-gray-800'
-                    }`}>
-                        {getStatusText(request.status)}
-                    </div>
-                )}
-            </div>
+            {/* Сообщение о невозможности изменения */}
+            {!canModify && !onWithdraw && (
+                <p className="text-center text-sm text-gray-500 mt-3">
+                    Заявка уже обработана
+                </p>
+            )}
         </div>
     );
-}
-
-function getStatusText(status: string): string {
-    switch (status) {
-        case 'submitted': return 'На рассмотрении';
-        case 'approved': return 'Принята';
-        case 'rejected': return 'Отклонена';
-        case 'deleted': return 'Отозвана';
-        default: return status;
-    }
-}
+};

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import {useEffect, useState} from 'react';
+import {useAuth} from '../../contexts/AuthContext';
 
 export interface Workout {
     id: number;
@@ -23,22 +23,58 @@ export const useWorkouts = (clubId?: number): UseWorkoutsResult => {
     const [workouts, setWorkouts] = useState<Workout[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { user } = useAuth();
+    const {user, isAuthenticated} = useAuth();
 
     const fetchWorkouts = async () => {
         try {
             setLoading(true);
             setError(null);
 
+            // Для студентов используем моковые данные
+            if (user?.role?.toLowerCase() === 'student') {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const mockWorkouts: Workout[] = [
+                    {
+                        id: 1,
+                        club_id: 1,
+                        club_name: 'Футбол',
+                        start_date: '2024-04-23T13:00:00',
+                        end_date: '2024-04-23T14:30:00',
+                        cancelled: false,
+                        created_at: '2024-04-20T10:00:00',
+                        updated_at: '2024-04-20T10:00:00'
+                    },
+                    {
+                        id: 2,
+                        club_id: 2,
+                        club_name: 'Баскетбол',
+                        start_date: '2024-04-25T14:00:00',
+                        end_date: '2024-04-25T16:00:00',
+                        cancelled: false,
+                        created_at: '2024-04-20T10:00:00',
+                        updated_at: '2024-04-20T10:00:00'
+                    }
+                ];
+
+                // Фильтруем по clubId если передан
+                const filteredWorkouts = clubId
+                    ? mockWorkouts.filter(workout => workout.club_id === clubId)
+                    : mockWorkouts;
+
+                setWorkouts(filteredWorkouts);
+                return;
+            }
+
+            // Для админов и учителей - реальный запрос
             const token = localStorage.getItem('access_token');
             if (!token) {
                 throw new Error('No access token found');
             }
 
-            // Если передан clubId, загружаем тренировки для конкретной секции
             if (clubId) {
                 const response = await fetch('http://localhost:8080/workouts/getByClub', {
-                    method: 'GET',
+                    method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -68,34 +104,8 @@ export const useWorkouts = (clubId?: number): UseWorkoutsResult => {
 
                 setWorkouts(transformedWorkouts);
             } else {
-                // TODO: Реализовать загрузку всех тренировок для студента
-                // Пока используем моковые данные
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                const mockWorkouts: Workout[] = [
-                    {
-                        id: 1,
-                        club_id: 1,
-                        club_name: 'Скалолазание',
-                        start_date: '2024-04-23T13:00:00',
-                        end_date: '2024-04-23T14:30:00',
-                        cancelled: false,
-                        created_at: '2024-04-20T10:00:00',
-                        updated_at: '2024-04-20T10:00:00'
-                    },
-                    {
-                        id: 2,
-                        club_id: 1,
-                        club_name: 'Скалолазание',
-                        start_date: '2024-04-25T14:00:00',
-                        end_date: '2024-04-25T16:00:00',
-                        cancelled: false,
-                        created_at: '2024-04-20T10:00:00',
-                        updated_at: '2024-04-20T10:00:00'
-                    }
-                ];
-
-                setWorkouts(mockWorkouts);
+                // TODO: Реализовать загрузку всех тренировок
+                setWorkouts([]);
             }
         } catch (err) {
             console.error('Ошибка при загрузке тренировок:', err);
@@ -106,8 +116,13 @@ export const useWorkouts = (clubId?: number): UseWorkoutsResult => {
     };
 
     useEffect(() => {
-        fetchWorkouts();
-    }, [clubId]);
+        if (isAuthenticated) {
+            fetchWorkouts();
+        } else {
+            setLoading(false);
+            setError('Пользователь не авторизован');
+        }
+    }, [clubId, isAuthenticated]);
 
     return {
         workouts,

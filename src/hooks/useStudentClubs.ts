@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useAuth} from '../../contexts/AuthContext';
+import api from '../lib/api';
 
 export interface StudentClub {
     id: number;
@@ -31,82 +32,77 @@ export const useStudentClubs = (): UseStudentClubsResult => {
             setLoading(true);
             setError(null);
 
-            // Получаем заявки студента со статусом "approved"
-            const joinRequestsResponse = await fetch('http://localhost:8080/club_join_requests/', {
-                method: 'POST',
+            if (!user?.id) {
+                setClubs([]);
+                setLoading(false);
+                return;
+            }
+
+            console.log('Fetching student clubs for user:', user.id);
+
+            // Получаем заявки студента
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                throw new Error('No access token found');
+            }
+
+            const responseRequests = await fetch(`http://localhost:8080/club-join-requests/get?user_id=${user.id}`, {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    user_id: user?.id,
-                    status: 'approved',
-                    limit: 1000,
-                    offset: 0
-                }),
             });
 
-            if (!joinRequestsResponse.ok) {
-                throw new Error(`Ошибка загрузки заявок: ${joinRequestsResponse.status}`);
+            if (!responseRequests.ok) {
+                throw new Error(`Ошибка загрузки заявок: ${responseRequests.status}`);
             }
 
-            const joinRequestsData = await joinRequestsResponse.json();
-            console.log('Approved join requests:', joinRequestsData);
+            const dataRequests = await responseRequests.json();
 
-            if (joinRequestsData.club_join_requests && Array.isArray(joinRequestsData.club_join_requests)) {
-                // Получаем ID всех клубов, в которых студент состоит
-                const clubIds = joinRequestsData.club_join_requests.map((request: any) => request.club_id);
+            // Фильтруем только approved заявки
+            const approvedRequests = (dataRequests.club_join_requests || []).filter(
+                (req: any) => req.Status && req.Status.toLowerCase() === 'approved'
+            );
 
-                if (clubIds.length === 0) {
-                    setClubs([]);
-                    setLoading(false);
-                    return;
-                }
+            console.log('Approved requests:', approvedRequests);
 
-                // Получаем информацию о каждом клубе
-                const clubDetailsPromises = clubIds.map(async (clubId: number) => {
-                    const clubResponse = await fetch('http://localhost:8080/club/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            id: clubId
-                        }),
-                    });
-
-                    if (!clubResponse.ok) {
-                        console.error(`Ошибка загрузки клуба ${clubId}: ${clubResponse.status}`);
-                        return null;
-                    }
-
-                    const clubData = await clubResponse.json();
-                    return clubData;
-                });
-
-                const clubDetails = await Promise.all(clubDetailsPromises);
-
-                // Фильтруем null значения и преобразуем данные
-                const validClubs: StudentClub[] = clubDetails
-                    .filter(club => club !== null)
-                    .map((club: any) => ({
-                        id: club.ID,
-                        name: club.Name,
-                        description: club.Description,
-                        sport_type: club.SportType,
-                        teacher: club.Teacher,
-                        total_places: club.TotalPlaces,
-                        place: club.Place,
-                        education_level: club.EducationLevel,
-                        required_workout_per_week: club.RequiredWorkoutPerWeek
-                    }));
-
-                console.log('Student clubs:', validClubs);
-                setClubs(validClubs);
-            } else {
+            if (approvedRequests.length === 0) {
                 setClubs([]);
+                return;
             }
+
+            // Получаем информацию о клубах из approved заявок
+            const clubIds = approvedRequests.map((req: any) => req.ClubID);
+            const uniqueClubIds = [...new Set(clubIds)];
+
+            // Получаем все клубы и фильтруем только те, в которых студент состоит
+            const response = await api.post('/clubs/', {
+                limit: 1000,
+                offset: 0
+            });
+
+            const allClubs = response.data.clubs || [];
+
+            // Фильтруем клубы по ID из approved заявок
+            const studentClubs: StudentClub[] = allClubs
+                .filter((club: any) => uniqueClubIds.includes(club.ID))
+                .map((club: any) => ({
+                    id: club.ID,
+                    name: club.Name,
+                    description: club.Description,
+                    sport_type: club.SportType,
+                    teacher: club.Teacher,
+                    total_places: club.TotalPlaces,
+                    place: club.Place,
+                    education_level: club.EducationLevel,
+                    required_workout_per_week: club.RequiredWorkoutPerWeek
+                }));
+
+            console.log('Student clubs (dynamic):', studentClubs);
+            setClubs(studentClubs);
+
         } catch (err) {
-            console.error('Ошибка при загрузке секций студента:', err);
+            console.error('Error in fetchStudentClubs:', err);
             setError('Не удалось загрузить данные о секциях');
             setClubs([]);
         } finally {
@@ -117,6 +113,8 @@ export const useStudentClubs = (): UseStudentClubsResult => {
     useEffect(() => {
         if (user && user.role?.toLowerCase() === 'student') {
             fetchStudentClubs();
+        } else {
+            setLoading(false);
         }
     }, [user]);
 

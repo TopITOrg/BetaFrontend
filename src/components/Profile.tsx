@@ -8,13 +8,13 @@ import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {useAuth} from "../../contexts/AuthContext";
 import {useTeacherClubs} from '@/hooks/useTeacherClubs';
-import {useStudentClubs} from '@/hooks/useStudentClubs'; // Добавляем хук для студента
+import {useStudentClubs} from '@/hooks/useStudentClubs';
 
 export function Profile() {
     const pathname = usePathname();
     const {user} = useAuth();
     const {clubs: teacherClubs, loading: teacherLoading} = useTeacherClubs();
-    const {clubs: studentClubs, loading: studentLoading} = useStudentClubs(); // Используем хук для студента
+    const {clubs: studentClubs, loading: studentLoading} = useStudentClubs();
 
     const isActive = (path: string) => {
         return pathname === path;
@@ -72,11 +72,11 @@ export function Profile() {
                         ) : studentClubs.length === 0 ? (
                             <DropdownMenuItem disabled>Нет секций</DropdownMenuItem>
                         ) : (
-                            studentClubs.map((club) => (
+                            studentClubs.map((club: { id: number; name: string }) => (
                                 <DropdownMenuItem key={club.id}>
-                                    <Link href={`/club/${club.id}`} className="w-full">
+                                    <div className="w-full">
                                         {club.name}
-                                    </Link>
+                                    </div>
                                 </DropdownMenuItem>
                             ))
                         )}
