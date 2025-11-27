@@ -7,13 +7,14 @@ import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {useAuth} from "../../contexts/AuthContext";
-import { useTeacherClubs } from '@/hooks/useTeacherClubs';
-
+import {useTeacherClubs} from '@/hooks/useTeacherClubs';
+import {useStudentClubs} from '@/hooks/useStudentClubs'; // Добавляем хук для студента
 
 export function Profile() {
     const pathname = usePathname();
     const {user} = useAuth();
-    const { clubs: teacherClubs, loading } = useTeacherClubs();
+    const {clubs: teacherClubs, loading: teacherLoading} = useTeacherClubs();
+    const {clubs: studentClubs, loading: studentLoading} = useStudentClubs(); // Используем хук для студента
 
     const isActive = (path: string) => {
         return pathname === path;
@@ -39,7 +40,6 @@ export function Profile() {
                 />
             )}
 
-            {/* Кнопка "Заявки" - для всех ролей */}
             <Link href="/applications">
                 <CustomButton
                     text="Заявки"
@@ -48,7 +48,6 @@ export function Profile() {
                 />
             </Link>
 
-            {/* Кнопка "Тренировка" - для всех ролей */}
             <Link href="/train_teacher">
                 <CustomButton
                     text="Тренировка"
@@ -68,9 +67,19 @@ export function Profile() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[190px]">
-                        <DropdownMenuItem>Футбол</DropdownMenuItem>
-                        <DropdownMenuItem className="text-[#0079DB]">Скалолазание</DropdownMenuItem>
-                        <DropdownMenuItem>Баскетбол</DropdownMenuItem>
+                        {studentLoading ? (
+                            <DropdownMenuItem disabled>Загрузка...</DropdownMenuItem>
+                        ) : studentClubs.length === 0 ? (
+                            <DropdownMenuItem disabled>Нет секций</DropdownMenuItem>
+                        ) : (
+                            studentClubs.map((club) => (
+                                <DropdownMenuItem key={club.id}>
+                                    <Link href={`/club/${club.id}`} className="w-full">
+                                        {club.name}
+                                    </Link>
+                                </DropdownMenuItem>
+                            ))
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )}
@@ -86,7 +95,7 @@ export function Profile() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[190px]">
-                        {loading ? (
+                        {teacherLoading ? (
                             <DropdownMenuItem disabled>Загрузка...</DropdownMenuItem>
                         ) : teacherClubs.length === 0 ? (
                             <DropdownMenuItem disabled>Нет секций</DropdownMenuItem>

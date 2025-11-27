@@ -1,6 +1,3 @@
-// Если импортируете типы из других файлов, используйте:
-// import type { SomeType } from './some-file';
-
 export interface ClubFromAPI {
     ID: number;
     Name: string;

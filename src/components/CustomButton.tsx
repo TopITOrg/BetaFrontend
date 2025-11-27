@@ -3,7 +3,8 @@ import {Button} from "@/components/ui/button";
 function CustomButton({
                           text,
                           isSelected = false,
-                          width, // Опциональный параметр
+                          width,
+                          children,
                           ...props
                       }: {
     text: string;
@@ -20,12 +21,13 @@ function CustomButton({
     return (
         <Button
             variant="outline"
-            style={width ? { width } : undefined} // Устанавливаем ширину только если передан параметр
+            style={width ? {width} : undefined}
             className={`${baseClasses} ${selectedClasses}`}
             {...props}
         >
-            {text}
+            {children || text}
         </Button>
     );
 }
-export { CustomButton };
+
+export {CustomButton};
