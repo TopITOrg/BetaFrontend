@@ -11,7 +11,7 @@ interface NavbarProps {
     selectedButton?: number;
 }
 
-function Navbar({ selectedButton = 0 }: NavbarProps) {
+function Navbar({ selectedButton = -1 }: NavbarProps) {
     const { isAuthenticated, user, logout } = useAuth();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
