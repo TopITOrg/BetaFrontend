@@ -50,7 +50,7 @@ export function Profile() {
 
             <Link href="/train_teacher">
                 <CustomButton
-                    text="Тренировка"
+                    text="Тренировки    "
                     isSelected={isActive("/train_teacher")}
                     width="190px"
                 />
