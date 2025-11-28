@@ -81,7 +81,7 @@ export const Application: React.FC<ApplicationProps> = ({
             {onWithdraw ? (
                 // Для студента - кнопка отзыва
                 <button
-                    className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                    className={`w-full py-3 rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105 ${
                         canModify
                             ? 'bg-orange-500 hover:bg-orange-600 text-white'
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -95,7 +95,7 @@ export const Application: React.FC<ApplicationProps> = ({
                 // Для тренера/админа - кнопки принятия/отклонения
                 <div className="flex gap-3">
                     <button
-                        className={`flex-1 py-3 rounded-4xl font-medium transition-colors ${
+                        className={`flex-1 py-3 rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105  ${
                             canModify
                                 ? 'bg-green-500 hover:bg-green-600 text-white'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -106,7 +106,7 @@ export const Application: React.FC<ApplicationProps> = ({
                         {isProcessing ? '...' : 'Принять'}
                     </button>
                     <button
-                        className={`flex-1 py-3 rounded-4xl font-medium transition-colors ${
+                        className={`flex-1 py-3 rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105 ${
                             canModify
                                 ? 'bg-red-500 hover:bg-red-600 text-white'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
