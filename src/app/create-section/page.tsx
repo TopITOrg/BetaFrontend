@@ -1,4 +1,3 @@
-// app/create-section/page.tsx
 'use client';
 
 import { useState } from 'react';

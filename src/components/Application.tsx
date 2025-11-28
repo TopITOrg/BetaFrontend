@@ -45,7 +45,7 @@ export const Application: React.FC<ApplicationProps> = ({
     const canModify = request.status.toLowerCase() === 'submitted';
 
     return (
-        <div className={`border-2 rounded-xl p-6 w-80 shadow-lg transition-all duration-200 hover:shadow-xl bg-white ${getStatusColor()}`}>
+        <div className={`border-2 rounded-4xl p-6 w-80 shadow-lg transition-all duration-200 hover:shadow-xl bg-white ${getStatusColor()}`}>
             {/* Заголовок */}
             <div className="text-center mb-4">
                 <h3 className="font-bold text-xl text-gray-800">Заявка в секцию</h3>
@@ -95,7 +95,7 @@ export const Application: React.FC<ApplicationProps> = ({
                 // Для тренера/админа - кнопки принятия/отклонения
                 <div className="flex gap-3">
                     <button
-                        className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
+                        className={`flex-1 py-3 rounded-4xl font-medium transition-colors ${
                             canModify
                                 ? 'bg-green-500 hover:bg-green-600 text-white'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -106,7 +106,7 @@ export const Application: React.FC<ApplicationProps> = ({
                         {isProcessing ? '...' : 'Принять'}
                     </button>
                     <button
-                        className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
+                        className={`flex-1 py-3 rounded-4xl font-medium transition-colors ${
                             canModify
                                 ? 'bg-red-500 hover:bg-red-600 text-white'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
