@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState, type Key } from "react";
 
 function Row() {
-    const [inputs, setInputs] = useState([]);
+    const [inputs, setInputs] = useState<string[]>([]);
 
     const addInput = () => {
         setInputs([...inputs, '']);
