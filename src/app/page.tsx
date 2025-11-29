@@ -20,7 +20,7 @@ export default function HomePage() {
                         <div className="flex-shrink-0">
                             <div className="relative w-64 h-64 lg:w-80 lg:h-80 rounded-2xl overflow-hidden shadow-2xl">
                                 <Image
-                                    src="/img.png"
+                                    src="/img.jpg"
                                     alt="Спортивная секция МАИ"
                                     fill
                                     className="object-cover hover:scale-105 transition-transform duration-300"
