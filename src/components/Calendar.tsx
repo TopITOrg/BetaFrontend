@@ -380,7 +380,7 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                         isSelected={false}
                         onClick={() => setShowCreateModal(true)}
                         width="200px"
-                        className="mt-3 border-2 border-blue-500 hover:bg-blue-50 transition-colors"
+                        
                     />
                 </div>
             )}
