@@ -34,7 +34,7 @@ export default function Page() {
             <Link
                 href="/"
                 className="absolute top-6 left-6 z-10 flex items-center gap-2 text-white bg-blue-500 rounded-xl p-2 px-4
-                hover:bg-blue-600 transition-colors duration-400 ease-in-out border-white border-2"
+                hover:bg-blue-600 transition-all hover:scale-105 duration-400 ease-in-out border-white border-2"
             >
                 <Home size={20} />
                 <span>На главную</span>
@@ -139,7 +139,7 @@ export default function Page() {
                             type="submit"
                             disabled={isPending}
                             className="text-white bg-blue-500 font-bold text-xl rounded-xl p-2 px-8
-                            hover:bg-blue-700 w-full transition-colors duration-400 ease-in-out
+                            hover:bg-blue-700 w-full transition-all hover:scale-105 duration-400 ease-in-out
                             disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isPending ? 'Регистрация...' : 'Зарегистрироваться'}
@@ -161,7 +161,7 @@ export default function Page() {
                     <Link
                         href="/login"
                         className="text-white bg-blue-500 font-bold border-[2px] border-white text-xl rounded-xl p-2 px-8
-                        hover:bg-blue-700 transition-colors duration-400 ease-in-out"
+                        hover:bg-blue-700 transition-all hover:scale-105 duration-400 ease-in-out"
                     >
                         Войти
                     </Link>
