@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link";
-import {Lock, Mail, User, Send, Phone, Calendar, Home} from "lucide-react"
+import {Lock, Mail, User, Send, Phone, Home} from "lucide-react"
 import { useRegister } from '@/hooks/useRegister';
 import { useState } from 'react';
 
@@ -52,7 +52,7 @@ export default function Page() {
                                 placeholder="ФИО"
                                 value={formData.full_name}
                                 onChange={handleChange}
-                                className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                className="rounded-xl p-2 w-full bg-gray-200 pr-10 text-gray-900 placeholder-gray-500"
                                 required
                             />
                             <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
@@ -65,24 +65,29 @@ export default function Page() {
                                 placeholder="Telegram аккаунт"
                                 value={formData.social_network_link}
                                 onChange={handleChange}
-                                className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                className="rounded-xl p-2 w-full bg-gray-200 pr-10 text-gray-900 placeholder-gray-500"
                                 required
                             />
                             <Send className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
 
                         {/* Birth Date */}
+
                         <div className="relative w-full">
                             <input
                                 name="birth_date"
                                 type="date"
-                                placeholder="Дата рождения"
                                 value={formData.birth_date}
                                 onChange={handleChange}
-                                className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                className="rounded-xl p-2 pr-3 w-full bg-gray-200 text-gray-900
+                                [color-scheme:light]
+                                [&::-webkit-datetime-edit]:text-gray-500
+                                [&::-webkit-datetime-edit-fields-wrapper]:text-gray-500
+                                [&::-webkit-calendar-picker-indicator]:opacity-50
+                                [&::-webkit-calendar-picker-indicator]:scale-150
+                                [&::-webkit-calendar-picker-indicator]:hover:opacity-100"
                                 required
                             />
-                            <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
 
                         {/* Phone Number */}
@@ -92,7 +97,7 @@ export default function Page() {
                                 placeholder="Номер телефона"
                                 value={formData.phone_number}
                                 onChange={handleChange}
-                                className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                className="rounded-xl p-2 w-full bg-gray-200 pr-10 text-gray-900 placeholder-gray-500"
                                 required
                             />
                             <Phone className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
@@ -106,7 +111,7 @@ export default function Page() {
                                 placeholder="Email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                className="rounded-xl p-2 w-full bg-gray-200 pr-10 text-gray-900 placeholder-gray-500"
                                 required
                             />
                             <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
@@ -120,7 +125,7 @@ export default function Page() {
                                 placeholder="Пароль"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className="rounded-xl p-2 w-full bg-gray-200 pr-10"
+                                className="rounded-xl p-2 w-full bg-gray-200 pr-10 text-gray-900 placeholder-gray-500"
                                 required
                             />
                             <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
