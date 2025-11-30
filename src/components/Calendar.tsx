@@ -1,25 +1,36 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
-import type { Workout } from '@/hooks/useWorkouts';
-import { useAuth } from '../../contexts/AuthContext';
-import { CreateWorkoutModal } from './CreateWorkoutModal';
-import { EditWorkoutModal } from './EditWorkoutModal';
-import { CustomButton } from './CustomButton';
-import { useClubs } from '@/hooks/useClubs';
-import { MoreVertical, Edit, Trash2, ChevronDown } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from "./ui/button";
+import {useEffect, useMemo, useState} from 'react';
+import type {Workout} from '@/hooks/useWorkouts';
+import {useAuth} from '../../contexts/AuthContext';
+import {CreateWorkoutModal} from './CreateWorkoutModal';
+import {EditWorkoutModal} from './EditWorkoutModal';
+import {CustomButton} from './CustomButton';
+import {useClubs} from '@/hooks/useClubs';
+import {ChevronDown, Edit, MoreVertical, Trash2} from 'lucide-react';
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {Button} from "./ui/button";
 
 interface CalendarProps {
     workouts: Workout[];
     onWorkoutCreate?: (workoutData: { club_id: number; start_date: string; end_date: string }) => Promise<void>;
-    onWorkoutUpdate?: (workoutData: { id: number; start_date?: string; end_date?: string; cancelled?: boolean }) => Promise<void>;
+    onWorkoutUpdate?: (workoutData: {
+        id: number;
+        start_date?: string;
+        end_date?: string;
+        cancelled?: boolean
+    }) => Promise<void>;
     onWorkoutDelete?: (workoutId: number) => Promise<void>;
     isEditMode?: boolean;
 }
 
-export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkoutDelete, isEditMode = false }: CalendarProps) {
-    const { user } = useAuth();
+export function Calendar({
+                             workouts,
+                             onWorkoutCreate,
+                             onWorkoutUpdate,
+                             onWorkoutDelete,
+                             isEditMode = false
+                         }: CalendarProps) {
+    const {user} = useAuth();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
@@ -29,8 +40,9 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
     const [showMenuForWorkout, setShowMenuForWorkout] = useState<number | null>(null);
     const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
     const [currentMonth, setCurrentMonth] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>(''); // Новое состояние для уведомления
 
-    const { clubs: allClubs } = useClubs();
+    const {clubs: allClubs} = useClubs();
 
     // Фильтруем клубы, у которых есть id
     const clubsWithId = useMemo(() =>
@@ -125,8 +137,8 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
             const start = new Date(startDate);
             const end = new Date(endDate);
 
-            const startTime = start.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            const endTime = end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            const startTime = start.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+            const endTime = end.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
 
             return `${startTime}-${endTime}`;
         } catch {
@@ -186,6 +198,10 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
             try {
                 await onWorkoutCreate(workoutData);
                 setShowCreateModal(false);
+                // Показываем уведомление об успехе
+                setSuccessMessage('Тренировка успешно создана!');
+                // Автоматически скрываем уведомление через 3 секунды
+                setTimeout(() => setSuccessMessage(''), 3000);
             } catch (error) {
                 console.error('Error creating workout:', error);
             } finally {
@@ -200,12 +216,20 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
         setShowMenuForWorkout(null);
     };
 
-    const handleUpdateWorkout = async (workoutData: { id: number; start_date?: string; end_date?: string; cancelled?: boolean }) => {
+    const handleUpdateWorkout = async (workoutData: {
+        id: number;
+        start_date?: string;
+        end_date?: string;
+        cancelled?: boolean
+    }) => {
         if (onWorkoutUpdate) {
             try {
                 await onWorkoutUpdate(workoutData);
                 setShowEditModal(false);
                 setSelectedWorkout(null);
+                // Показываем уведомление об успехе
+                setSuccessMessage('Тренировка успешно обновлена!');
+                setTimeout(() => setSuccessMessage(''), 3000);
             } catch (error) {
                 console.error('Error updating workout:', error);
             }
@@ -217,6 +241,9 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
             try {
                 await onWorkoutDelete(workoutId);
                 setShowMenuForWorkout(null);
+                // Показываем уведомление об успехе
+                setSuccessMessage('Тренировка успешно удалена!');
+                setTimeout(() => setSuccessMessage(''), 3000);
             } catch (error) {
                 console.error('Error deleting workout:', error);
             }
@@ -237,6 +264,13 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                 <span className="text-gray-600 text-sm">{currentMonth}</span>
             </div>
 
+            {/* Уведомление об успехе */}
+            {successMessage && (
+                <div className="w-full p-3 bg-green-50 border border-green-200 rounded-lg mb-4">
+                    <p className="text-green-600 text-sm text-center">{successMessage}</p>
+                </div>
+            )}
+
             {showClubSelector && (
                 <div className="mb-3">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -252,7 +286,7 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                         transition-colors duration-400 ease-in-out h-[40px] w-[190px] flex items-center justify-between"
                             >
                                 <span>{selectedClubName}</span>
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="h-4 w-4"/>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-[190px]">
@@ -278,7 +312,7 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                 </div>
             )}
 
-            {/* Остальной код календаря остается без изменений */}
+            {/* Остальной код календаря */}
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead className="bg-gray-100">
@@ -313,7 +347,8 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                                         className="p-1 border border-gray-300 min-w-[80px] h-[50px] relative"
                                     >
                                         {trainingInfo && (
-                                            <div className="absolute inset-0 bg-[#E7F6FD] border-l-2 border-l-[#0369a1] flex items-start p-1">
+                                            <div
+                                                className="absolute inset-0 bg-[#E7F6FD] border-l-2 border-l-[#0369a1] flex items-start p-1">
                                                 {isStart && (
                                                     <div className="text-xs leading-tight w-full">
                                                         <div className="flex justify-between items-start">
@@ -334,24 +369,26 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                                                                         onClick={() => toggleMenu(trainingInfo.workout.id)}
                                                                         className="p-1 hover:bg-gray-200 rounded transition-colors"
                                                                     >
-                                                                        <MoreVertical size={12} className="text-[#0369a1]" />
+                                                                        <MoreVertical size={12}
+                                                                                      className="text-[#0369a1]"/>
                                                                     </button>
 
                                                                     {showMenuForWorkout === trainingInfo.workout.id && (
-                                                                        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]">
+                                                                        <div
+                                                                            className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]">
                                                                             <div className="p-1">
                                                                                 <button
                                                                                     onClick={() => handleEditWorkout(trainingInfo.workout)}
                                                                                     className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors mb-1"
                                                                                 >
-                                                                                    <Edit size={12} className="mr-2" />
+                                                                                    <Edit size={12} className="mr-2"/>
                                                                                     Редактировать
                                                                                 </button>
                                                                                 <button
                                                                                     onClick={() => handleDeleteWorkout(trainingInfo.workout.id)}
                                                                                     className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
                                                                                 >
-                                                                                    <Trash2 size={12} className="mr-2" />
+                                                                                    <Trash2 size={12} className="mr-2"/>
                                                                                     Удалить
                                                                                 </button>
                                                                             </div>
@@ -380,7 +417,6 @@ export function Calendar({ workouts, onWorkoutCreate, onWorkoutUpdate, onWorkout
                         isSelected={false}
                         onClick={() => setShowCreateModal(true)}
                         width="200px"
-                        
                     />
                 </div>
             )}

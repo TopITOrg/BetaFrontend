@@ -26,6 +26,8 @@ export const useCreateWorkout = (): UseCreateWorkoutResult => {
                 throw new Error('No access token found');
             }
 
+            console.log('Creating workout with data:', data);
+
             const response = await fetch('http://localhost:8080/workouts/create', {
                 method: 'POST',
                 headers: {
@@ -36,10 +38,14 @@ export const useCreateWorkout = (): UseCreateWorkoutResult => {
             });
 
             if (!response.ok) {
-                throw new Error(`Ошибка создания: ${response.status}`);
+                const errorText = await response.text();
+                console.error('Backend error response:', errorText);
+                throw new Error(`Ошибка создания: ${response.status} - ${errorText}`);
             }
 
-            // Успешное создание
+            const result = await response.json();
+            console.log('Workout created successfully:', result);
+
         } catch (err) {
             console.error('Ошибка при создании тренировки:', err);
             setError('Не удалось создать тренировку');
