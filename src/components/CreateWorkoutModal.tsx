@@ -29,8 +29,13 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
 
     useEffect(() => {
         if (isOpen) {
-            const today = new Date().toISOString().split('T')[0];
-            setSelectedDate(today);
+            const todayString = new Date().toISOString();
+            const today = todayString.split('T')[0];
+            if (today) {
+                setSelectedDate(today);
+            } else {
+                setSelectedDate('');
+            }
             setStartTime('18:00');
             setEndTime('19:30');
             setErrors({});
