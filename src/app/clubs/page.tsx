@@ -66,7 +66,7 @@ export default function ClubsPage() {
     if (error && clubs.length === 0) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={1} />
+                <Navbar selectedButton={2} />
                 <div className="flex flex-col justify-center items-center h-64 gap-4">
                     <div className="text-red-500 text-lg text-center">
                         Не удалось загрузить данные о секциях
@@ -85,7 +85,7 @@ export default function ClubsPage() {
     return (
         <main className="flex flex-col min-h-screen bg-white">
             <div className="flex flex-col sticky top-0 bg-white z-10 gap-2 mb-2">
-                <Navbar selectedButton={1} />
+                <Navbar selectedButton={2} />
                 <div className="w-full border-gray-100 flex flex-col justify-center px-20">
                     <div className="h-[40px] relative">
                         <Input
