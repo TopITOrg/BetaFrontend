@@ -32,12 +32,15 @@ export function Profile() {
                 <AvatarFallback>CN</AvatarFallback>
             </Avatar>
 
+            {/* Кнопка Участники для тренера/админа */}
             {isTeacherOrAdmin && (
-                <CustomButton
-                    text="Участники"
-                    isSelected={isActive("/участники")}
-                    width="190px"
-                />
+                <Link href="/club_members">
+                    <CustomButton
+                        text="Участники"
+                        isSelected={isActive("/club_members")}
+                        width="190px"
+                    />
+                </Link>
             )}
 
             <Link href="/applications">
@@ -56,6 +59,7 @@ export function Profile() {
                 />
             </Link>
 
+            {/* Меню для студента */}
             {isStudent && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -84,6 +88,7 @@ export function Profile() {
                 </DropdownMenu>
             )}
 
+            {/* Меню для тренера/админа */}
             {isTeacherOrAdmin && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -120,5 +125,5 @@ export function Profile() {
                 </DropdownMenu>
             )}
         </div>
-    )
+    );
 }
