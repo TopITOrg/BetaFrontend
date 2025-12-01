@@ -76,9 +76,17 @@ export default function ClubMembersPage() {
     const [selectedClubName, setSelectedClubName] = useState<string>('');
     const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('list');
 
+    const selectedClub = teacherClubs.find(club => club.id === selectedClubId);
     const {members, loading: membersLoading, error} = useSectionMembers({
         clubId: selectedClubId || undefined
     });
+
+    const totalPlaces = selectedClub?.total_places || 0;
+    const takenPlaces = selectedClub?.taken_places || members.length;
+    const freePlaces = Math.max(0, totalPlaces - takenPlaces);
+    const fillPercentage = totalPlaces > 0 ? Math.min((takenPlaces / totalPlaces) * 100, 100) : 0;
+
+    console.log(`Секция ${selectedClubName}: всего мест=${totalPlaces}, занято=${takenPlaces}, свободно=${freePlaces}, участников=${members.length}`);
 
     // Автовыбор первой секции
     useEffect(() => {
@@ -180,9 +188,34 @@ export default function ClubMembersPage() {
                                     <h2 className="text-lg font-semibold text-gray-800">
                                         {selectedClubName} • Участников: {members.length}
                                     </h2>
+
+                                    {/* ДОБАВЬТЕ ЭТОТ КОД ДЛЯ ПРОГРЕСС-БАРА */}
+                                    {teacherClubs.find(c => c.id === selectedClubId)?.total_places !== undefined && (
+                                        <div className="mt-2">
+                                            <div className="text-sm text-gray-500 mb-1">
+                                                Занято {members.length} из {teacherClubs.find(c => c.id === selectedClubId)?.total_places} мест
+                                                {teacherClubs.find(c => c.id === selectedClubId)?.total_places &&
+                                                    members.length < (teacherClubs.find(c => c.id === selectedClubId)?.total_places || 0) && (
+                                                        <span className="text-green-600 ml-2">
+                                    (Осталось {(teacherClubs.find(c => c.id === selectedClubId)?.total_places || 0) - members.length})
+                                </span>
+                                                    )}
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2 max-w-xs">
+                                                <div
+                                                    className="bg-blue-500 h-2 rounded-full"
+                                                    style={{
+                                                        width: `${Math.min(
+                                                            (members.length / (teacherClubs.find(c => c.id === selectedClubId)?.total_places || 1)) * 100,
+                                                            100
+                                                        )}%`
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Переключатель вида */}
                                 {/* Переключатель вида */}
                                 <div className="flex items-center gap-2">
                                     <button

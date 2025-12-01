@@ -11,11 +11,54 @@ interface ClubData {
     skillLevel: string;
     description: string;
     sportType?: string;
+    totalPlaces?: number;
+    takenPlaces?: number;
 }
 
 function ClubCard({clubData}: { clubData: ClubData }) {
     const [showDetails, setShowDetails] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Функция для расчета свободных мест
+    const getFreePlaces = () => {
+        const total = clubData.totalPlaces || 0;
+        const taken = clubData.takenPlaces || 0;
+        console.log(`ClubCard "${clubData.title}": total=${total}, taken=${taken}, free=${total - taken}`);
+        return Math.max(0, total - taken);
+    };
+
+    const freePlaces = getFreePlaces();
+
+    // Функция для расчета процента заполнения
+    const calculateFillPercentage = () => {
+        if (!clubData.totalPlaces || clubData.totalPlaces === 0) return 0;
+        const taken = clubData.takenPlaces || 0;
+        return Math.min((taken / clubData.totalPlaces) * 100, 100);
+    };
+
+    // Функция для определения цвета в зависимости от доступности мест
+    const getAvailabilityColor = () => {
+        if (!clubData.totalPlaces || clubData.totalPlaces === 0) return 'gray';
+        if (freePlaces === 0) return 'red';
+        if (freePlaces <= clubData.totalPlaces * 0.2) return 'orange';
+        return 'green';
+    };
+
+    const availabilityColor = getAvailabilityColor();
+
+    // Функция для получения классов цвета
+    const getColorClasses = (color: string, type: 'bg' | 'text' = 'bg') => {
+        switch (color) {
+            case 'red':
+                return type === 'bg' ? 'bg-red-500' : 'text-red-600';
+            case 'orange':
+                return type === 'bg' ? 'bg-orange-500' : 'text-orange-600';
+            case 'green':
+                return type === 'bg' ? 'bg-green-500' : 'text-green-600';
+            default:
+                return type === 'bg' ? 'bg-gray-500' : 'text-gray-600';
+        }
+    };
 
     const getSkillLevelColor = (level: string) => {
         switch (level.toLowerCase()) {
@@ -43,7 +86,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
     };
 
     const handleSubmitApplication = async () => {
-        // Подтверждение действия
         const isConfirmed = window.confirm(
             `Вы уверены, что хотите подать заявку в секцию "${clubData.title}"?`
         );
@@ -55,7 +97,7 @@ function ClubCard({clubData}: { clubData: ClubData }) {
         setIsSubmitting(true);
 
         try {
-            const token = localStorage.getItem('access_token'); 
+            const token = localStorage.getItem('access_token');
 
             const response = await fetch('http://localhost:8080/club-join-requests/', {
                 method: 'POST',
@@ -70,7 +112,7 @@ function ClubCard({clubData}: { clubData: ClubData }) {
 
             if (response.ok) {
                 alert('Заявка успешно подана!');
-                setShowDetails(false); // Автоматическое закрытие модального окна
+                setShowDetails(false);
             } else {
                 const errorData = await response.json();
                 if (response.status === 409) {
@@ -106,15 +148,32 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                     </div>
 
                     <div className="space-y-2 mt-auto">
-                        <div className="flex items-center gap-2">
-                            <div className={`w-3 h-3 rounded-full ${
-                                clubData.availableSpots === '0' ? 'bg-red-500' : 'bg-green-500'
-                            }`}></div>
-                            <span className="text-gray-700 font-medium text-sm">
-                                Свободно: <span className={
-                                clubData.availableSpots === '0' ? 'text-red-600' : 'text-green-600'
-                            }>{clubData.availableSpots}</span>
-                            </span>
+                        {/* Блок с информацией о местах и прогресс-баром */}
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <div className={`w-3 h-3 rounded-full ${getColorClasses(availabilityColor, 'bg')}`}></div>
+                                <span className="text-gray-700 font-medium text-sm">
+                                    Свободно: <span className={getColorClasses(availabilityColor, 'text')}>
+                                        {freePlaces} из {clubData.totalPlaces || 0}
+                                    </span>
+                                </span>
+                            </div>
+
+                            {/* Прогресс-бар */}
+                            {clubData.totalPlaces && clubData.totalPlaces > 0 && (
+                                <div className="relative pt-1">
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                                            style={{ width: `${calculateFillPercentage()}%` }}
+                                        />
+                                    </div>
+                                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                        <span>Занято: {clubData.takenPlaces || 0}</span>
+                                        <span>Всего: {clubData.totalPlaces}</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -177,16 +236,35 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                 <span className="text-sm text-gray-600">Уровень подготовки</span>
                             </div>
 
-                            {/* Основная информация */}
+                            {/* Основная информация с прогресс-баром */}
                             <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-3 h-3 rounded-full ${
-                                        clubData.availableSpots === '0' ? 'bg-red-500' : 'bg-green-500'
-                                    }`}></div>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">Доступные места</h3>
-                                        <p className="text-gray-700">{clubData.availableSpots}</p>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-3 h-3 rounded-full ${getColorClasses(availabilityColor, 'bg')}`}></div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">Доступные места</h3>
+                                            <p className={`text-lg font-medium ${getColorClasses(availabilityColor, 'text')}`}>
+                                                {freePlaces} из {clubData.totalPlaces || 0}
+                                            </p>
+                                        </div>
                                     </div>
+
+                                    {/* Прогресс-бар в модальном окне */}
+                                    {clubData.totalPlaces && clubData.totalPlaces > 0 && (
+                                        <div className="pl-9">
+                                            <div className="w-full bg-gray-200 rounded-full h-3">
+                                                <div
+                                                    className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+                                                    style={{ width: `${calculateFillPercentage()}%` }}
+                                                />
+                                            </div>
+                                            <div className="flex justify-between text-sm text-gray-600 mt-2">
+                                                <span>Занято: {clubData.takenPlaces || 0}</span>
+                                                <span>Свободно: {freePlaces}</span>
+                                                <span>Всего: {clubData.totalPlaces}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center gap-3">
@@ -227,8 +305,15 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                 isSelected={true}
                                 onClick={handleSubmitApplication}
                                 width="100%"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || freePlaces === 0}
                             />
+
+                            {/* Сообщение если мест нет */}
+                            {freePlaces === 0 && (
+                                <p className="text-red-500 text-sm mt-2 text-center">
+                                    Все места заняты. Заявки временно не принимаются.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

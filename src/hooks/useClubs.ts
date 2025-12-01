@@ -1,23 +1,6 @@
-import {useEffect, useState} from 'react';
-import type {ClubData} from '@/components/ClubCard';
-import {useAuth} from '../../contexts/AuthContext';
-
-export interface ClubFromBackend {
-    ID: number;
-    Name: string;
-    Description: string;
-    SportTypeID: number;
-    SportType: string;
-    TeacherID: number;
-    Teacher: string;
-    TotalPlaces: number | null;
-    Place: string;
-    EducationLevelID: number;
-    EducationLevel: string;
-    RequiredWorkoutPerWeek: number;
-    CreatedAt: string;
-    UpdatedAt: string;
-}
+import { useEffect, useState } from 'react';
+import type { ClubData } from '@/components/ClubCard';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface UseClubsResult {
     clubs: ClubData[];
@@ -30,14 +13,13 @@ export const useClubs = (): UseClubsResult => {
     const [clubs, setClubs] = useState<ClubData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const {user, isAuthenticated} = useAuth();
+    const { user, isAuthenticated } = useAuth();
 
     const fetchClubs = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // Проверяем аутентификацию
             if (!isAuthenticated) {
                 setError('Пользователь не авторизован');
                 setLoading(false);
@@ -51,8 +33,6 @@ export const useClubs = (): UseClubsResult => {
                 return;
             }
 
-            console.log('Sending clubs request with token:', token); // Debug log
-
             const response = await fetch('http://localhost:8080/clubs/', {
                 method: 'POST',
                 headers: {
@@ -65,8 +45,6 @@ export const useClubs = (): UseClubsResult => {
                 }),
             });
 
-            console.log('Clubs response status:', response.status); // Debug log
-
             if (!response.ok) {
                 if (response.status === 401) {
                     setError('Ошибка авторизации');
@@ -77,28 +55,38 @@ export const useClubs = (): UseClubsResult => {
             }
 
             const data = await response.json();
-            console.log('Clubs data received:', data); // Debug log
+            console.log('Данные всех секций:', data);
 
             if (data.clubs && Array.isArray(data.clubs)) {
-                const transformedClubs: ClubData[] = data.clubs.map((club: ClubFromBackend) => {
+                const transformedClubs: ClubData[] = data.clubs.map((club: any) => {
+                    const totalPlaces = club.TotalPlaces || 0;
+                    const takenPlaces = club.TakenPlaces || 0;
+                    const freePlaces = Math.max(0, totalPlaces - takenPlaces);
+
+                    console.log(`Секция "${club.Name}": всего=${totalPlaces}, занято=${takenPlaces}, свободно=${freePlaces}`);
+
                     return {
                         title: club.Name,
-                        availableSpots: club.TotalPlaces ? `${club.TotalPlaces}` : '0',
+                        availableSpots: `${freePlaces} из ${totalPlaces}`,
                         location: club.Place,
-                        workoutsPerWeek: club.RequiredWorkoutPerWeek.toString(),
+                        workoutsPerWeek: club.RequiredWorkoutPerWeek?.toString() || '1',
                         skillLevel: club.EducationLevel,
                         description: club.Description,
-                        id: club.ID
+                        id: club.ID,
+                        sportType: club.SportType,
+                        totalPlaces: totalPlaces,
+                        takenPlaces: takenPlaces,
                     };
                 });
 
+                console.log('Преобразованные секции:', transformedClubs);
                 setClubs(transformedClubs);
             } else {
                 throw new Error('Неверный формат данных от сервера');
             }
         } catch (err) {
-            console.error('Ошибка при загрузке клубов:', err);
-            setError('Не удалось загрузить данные о клубах');
+            console.error('Ошибка при загрузке секций:', err);
+            setError('Не удалось загрузить данные о секциях');
             setClubs([]);
         } finally {
             setLoading(false);
