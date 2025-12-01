@@ -2,14 +2,18 @@ import { useCallback, useEffect, useState } from 'react';
 import api from '../lib/api';
 
 export interface SectionMember {
-    ID: number;
-    UserID: number;
-    UserName: string;
-    ClubID: number;
-    ClubName: string;
-    Status: string;
-    CreatedAt: string;
-    UpdatedAt: string;
+    id: number;
+    user_id: number;
+    user_name: string;
+    club_id: number;
+    club_name: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    user_email?: string;
+    user_phone?: string;
+    user_snl?: string;
+    group_name?: string;
 }
 
 interface UseSectionMembersProps {
@@ -34,9 +38,8 @@ export const useSectionMembers = ({ clubId }: UseSectionMembersProps = {}) => {
             console.log('=== DEBUG: Отправляем запрос на заявки ===');
             console.log('Club ID:', selectedClubId);
 
-            // Используем snake_case, как в бекенде
             const response = await api.post('/club-join-requests/get', {
-                club_id: selectedClubId,  // snake_case
+                club_id: selectedClubId,
                 status: 'approved',
                 limit: 1000,
                 offset: 0
@@ -45,20 +48,42 @@ export const useSectionMembers = ({ clubId }: UseSectionMembersProps = {}) => {
             const data = response.data;
             console.log('Полный ответ от /club-join-requests/get:', data);
 
-            // Согласно GetClubJoinRequestsResponse, поле называется ClubJoinRequests
-            if (data.ClubJoinRequests && Array.isArray(data.ClubJoinRequests)) {
-                console.log('Найдено заявок:', data.ClubJoinRequests.length);
-                console.log('Первая заявка:', data.ClubJoinRequests[0]);
+            if (data.club_join_requests && Array.isArray(data.club_join_requests)) {
+                console.log('Найдено заявок:', data.club_join_requests.length);
 
-                const approvedMembers = data.ClubJoinRequests.map((request: any) => ({
-                    ID: request.id || request.ID || 0,
-                    UserID: request.user_id || request.UserID || 0,
-                    UserName: request.user_name || request.UserName || '',
-                    ClubID: request.club_id || request.ClubID || 0,
-                    ClubName: request.club_name || request.ClubName || '',
-                    Status: request.status || request.Status || '',
-                    CreatedAt: request.created_at || request.CreatedAt || '',
-                    UpdatedAt: request.updated_at || request.UpdatedAt || ''
+                const approvedMembers: SectionMember[] = data.club_join_requests.map((request: any) => ({
+                    id: request.id || request.ID || 0,
+                    user_id: request.user_id || request.UserID || 0,
+                    user_name: request.user_name || request.UserName || '',
+                    club_id: request.club_id || request.ClubID || 0,
+                    club_name: request.club_name || request.ClubName || '',
+                    status: request.status || request.Status || '',
+                    created_at: request.created_at || request.CreatedAt || '',
+                    updated_at: request.updated_at || request.UpdatedAt || '',
+                    user_email: request.user_email || request.UserEmail || '',
+                    user_phone: request.user_phone || request.UserPhone || '',
+                    user_snl: request.user_snl || request.UserSnl || '',
+                    group_name: request.group_name || request.GroupName || ''
+                }));
+
+                console.log('Преобразованные участники:', approvedMembers);
+                setMembers(approvedMembers);
+            } else if (data.ClubJoinRequests && Array.isArray(data.ClubJoinRequests)) {
+                console.log('Найдено заявок:', data.ClubJoinRequests.length);
+
+                const approvedMembers: SectionMember[] = data.ClubJoinRequests.map((request: any) => ({
+                    id: request.id || request.ID || 0,
+                    user_id: request.user_id || request.UserID || 0,
+                    user_name: request.user_name || request.UserName || '',
+                    club_id: request.club_id || request.ClubID || 0,
+                    club_name: request.club_name || request.ClubName || '',
+                    status: request.status || request.Status || '',
+                    created_at: request.created_at || request.CreatedAt || '',
+                    updated_at: request.updated_at || request.UpdatedAt || '',
+                    user_email: request.user_email || request.UserEmail || '',
+                    user_phone: request.user_phone || request.UserPhone || '',
+                    user_snl: request.user_snl || request.UserSnl || '',
+                    group_name: request.group_name || request.GroupName || ''
                 }));
 
                 console.log('Преобразованные участники:', approvedMembers);
@@ -70,11 +95,9 @@ export const useSectionMembers = ({ clubId }: UseSectionMembersProps = {}) => {
         } catch (err: any) {
             console.error('Ошибка при получении участников:', err);
 
-            // Подробное логирование ошибки
             if (err.response) {
                 console.error('Статус ошибки:', err.response.status);
                 console.error('Данные ошибки:', err.response.data);
-                console.error('Заголовки ошибки:', err.response.headers);
 
                 if (err.response.status === 401) {
                     setError('Ошибка авторизации. Пожалуйста, войдите снова.');
@@ -82,8 +105,10 @@ export const useSectionMembers = ({ clubId }: UseSectionMembersProps = {}) => {
                     setError('У вас нет прав для просмотра заявок.');
                 } else if (err.response.status === 404) {
                     setError('Эндпоинт не найден. Проверьте URL.');
+                } else if (err.response.status === 400) {
+                    setError('Неверные параметры запроса.');
                 } else {
-                    setError(`Ошибка сервера: ${err.response.status} - ${err.response.data?.message || 'Неизвестная ошибка'}`);
+                    setError(`Ошибка сервера: ${err.response.status}`);
                 }
             } else if (err.request) {
                 console.error('Запрос был сделан, но ответ не получен:', err.request);

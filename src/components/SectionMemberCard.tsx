@@ -21,25 +21,25 @@ export const SectionMemberCard: React.FC<SectionMemberCardProps> = ({member}) =>
             <div className="space-y-3 mb-4">
                 <div>
                     <p className="text-sm text-gray-600">Имя участника</p>
-                    <p className="font-semibold text-lg text-gray-800">{member.UserName}</p>
+                    <p className="font-semibold text-lg text-gray-800">{member.user_name}</p>
                 </div>
 
                 <div>
                     <p className="text-sm text-gray-600">Секция</p>
-                    <p className="font-medium text-gray-800">{member.ClubName}</p>
+                    <p className="font-medium text-gray-800">{member.club_name}</p>
                 </div>
 
                 <div>
                     <p className="text-sm text-gray-600">Дата принятия</p>
                     <p className="text-sm text-gray-700">
-                        {new Date(member.CreatedAt).toLocaleDateString('ru-RU')}
+                        {new Date(member.created_at).toLocaleDateString('ru-RU')}
                     </p>
                 </div>
 
                 <div>
                     <p className="text-sm text-gray-600">Статус с</p>
                     <p className="text-sm text-gray-700">
-                        {new Date(member.UpdatedAt).toLocaleDateString('ru-RU')}
+                        {new Date(member.updated_at).toLocaleDateString('ru-RU')}
                     </p>
                 </div>
             </div>
@@ -47,7 +47,7 @@ export const SectionMemberCard: React.FC<SectionMemberCardProps> = ({member}) =>
             {/* Дополнительная информация */}
             <div className="pt-4 border-t border-gray-200">
                 <p className="text-sm text-gray-600">ID участника</p>
-                <p className="text-sm font-mono text-gray-700">#{member.UserID}</p>
+                <p className="text-sm font-mono text-gray-700">#{member.user_id}</p>
             </div>
         </div>
     );
