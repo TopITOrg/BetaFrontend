@@ -178,7 +178,7 @@ export default function ClubMembersPage() {
                             <div className="flex items-center justify-between mb-4">
                                 <div>
                                     <h2 className="text-lg font-semibold text-gray-800">
-                                        {selectedClubName} • {members.length} участников
+                                        {selectedClubName} • Участников: {members.length}
                                     </h2>
                                 </div>
 
@@ -306,13 +306,6 @@ export default function ClubMembersPage() {
                                         ))}
                                         </tbody>
                                     </table>
-                                </div>
-                            )}
-
-                            {/* Статистика */}
-                            {members.length > 0 && (
-                                <div className="mt-6 pt-4 border-t border-gray-200 text-sm text-gray-500">
-                                    Показано {members.length} участников
                                 </div>
                             )}
                         </div>
