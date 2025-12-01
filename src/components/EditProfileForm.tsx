@@ -1,6 +1,6 @@
 'use client'
-import { Calendar, Mail, Phone, Send, User, Lock} from "lucide-react";
-import { useState, useEffect } from "react";
+import { Calendar, Lock, Mail, Phone, Send, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ interface FormData {
 }
 
 export function EditProfileForm() {
-    const {user, updateUser} = useAuth();
+    const { user, updateUser, fetchUserData } = useAuth();
     const router = useRouter();
 
     const [formData, setFormData] = useState<FormData>({
@@ -30,6 +30,13 @@ export function EditProfileForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    useEffect(() => {
+        // Загружаем данные пользователя при монтировании
+        if (!user || !user.full_name) {
+            fetchUserData();
+        }
+    }, [fetchUserData]);
 
     useEffect(() => {
         if (user) {
@@ -58,7 +65,7 @@ export function EditProfileForm() {
     }, [user]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -103,6 +110,9 @@ export function EditProfileForm() {
                 if (newBirthDate !== oldBirthDate) {
                     updateData.birth_date = newBirthDate;
                 }
+            } else if (user.birth_date) {
+                // Если дата была, но теперь очищена
+                updateData.birth_date = null;
             }
 
             if (formData.password.trim()) {
@@ -136,6 +146,7 @@ export function EditProfileForm() {
             }
 
             if (response.ok) {
+                // Обновляем данные в контексте
                 updateUser({
                     full_name: responseData.full_name,
                     social_network_link: responseData.social_network_link,
@@ -146,17 +157,30 @@ export function EditProfileForm() {
                     group_name: responseData.group_name,
                 });
 
+                // Перезагружаем данные с сервера для гарантии
+                await fetchUserData();
+
                 setSuccess('Профиль успешно обновлен!');
-                setFormData(prev => ({...prev, password: ''}));
+                setFormData(prev => ({ ...prev, password: '' }));
             } else {
                 setError(responseData.message || `Ошибка ${response.status} при обновлении профиля`);
             }
-        } catch {
+        } catch (error) {
+            console.error('Update error:', error);
             setError('Произошла ошибка при обновлении профиля');
         } finally {
             setIsLoading(false);
         }
     };
+
+    if (!user) {
+        return (
+            <div className="flex flex-col items-center justify-center gap-5 w-full">
+                <h1 className="text-black font-bold text-4xl">Редактирование профиля</h1>
+                <div className="text-gray-500">Загрузка данных...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center justify-center gap-5 w-full">
@@ -172,7 +196,7 @@ export function EditProfileForm() {
                         className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
                         disabled={isLoading}
                     />
-                    <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
+                    <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                 </div>
 
                 <div className="relative w-full">
@@ -184,7 +208,7 @@ export function EditProfileForm() {
                         className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
                         disabled={isLoading}
                     />
-                    <Send className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
+                    <Send className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                 </div>
 
                 <div className="relative w-full">
@@ -196,7 +220,7 @@ export function EditProfileForm() {
                         className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
                         disabled={isLoading}
                     />
-                    <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
+                    <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                 </div>
 
                 <div className="relative w-full">
@@ -208,7 +232,7 @@ export function EditProfileForm() {
                         className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
                         disabled={isLoading}
                     />
-                    <Phone className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
+                    <Phone className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                 </div>
 
                 <div className="relative w-full">
@@ -221,7 +245,7 @@ export function EditProfileForm() {
                         className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
                         disabled={isLoading}
                     />
-                    <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
+                    <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                 </div>
 
                 <div className="relative w-full">
@@ -234,7 +258,7 @@ export function EditProfileForm() {
                         className="rounded-xl p-2 w-full bg-gray-200 pr-10 border-2"
                         disabled={isLoading}
                     />
-                    <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
+                    <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                 </div>
 
                 {error && (
@@ -257,7 +281,8 @@ export function EditProfileForm() {
                     >
                         {isLoading ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <div
+                                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                 <span>Сохранение...</span>
                             </>
                         ) : (

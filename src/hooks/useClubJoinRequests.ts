@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 export interface ClubJoinRequest {
     id: number;
@@ -6,12 +7,11 @@ export interface ClubJoinRequest {
     club_name: string;
     user_id: number;
     user_name: string;
-    status: string; 
+    status: string;
     created_at: string;
     updated_at: string;
 }
 
-// Добавляем экспорт интерфейсов параметров и результата
 export interface UseClubJoinRequestsParams {
     club_id?: number;
     user_id?: number;
@@ -31,6 +31,7 @@ export const useClubJoinRequests = (params: UseClubJoinRequestsParams = {}): Use
     const [requests, setRequests] = useState<ClubJoinRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { user } = useAuth();
 
     const fetchRequests = async (): Promise<void> => {
         try {
@@ -42,52 +43,81 @@ export const useClubJoinRequests = (params: UseClubJoinRequestsParams = {}): Use
                 throw new Error('No access token found');
             }
 
-            const queryParams = new URLSearchParams();
-            if (params.club_id !== undefined) queryParams.append('club_id', params.club_id.toString());
-            if (params.user_id !== undefined) queryParams.append('user_id', params.user_id.toString());
-            if (params.status) queryParams.append('status', params.status);
-            if (params.limit !== undefined) queryParams.append('limit', params.limit.toString());
-            if (params.offset !== undefined) queryParams.append('offset', params.offset.toString());
+            // Создаем тело запроса в формате JSON
+            const requestBody: any = {};
 
-            const url = `http://localhost:8080/club-join-requests/get?${queryParams}`;
+            // Для студентов автоматически добавляем их user_id
+            if (user?.role?.toLowerCase() === 'student') {
+                requestBody.user_id = user.id;
+            } else {
+                // Для админов/учителей используем переданный user_id или ничего
+                if (params.user_id !== undefined) {
+                    requestBody.user_id = params.user_id;
+                }
+            }
 
-            const response = await fetch(url, {
-                method: 'GET',
+            // Добавляем другие параметры если они есть
+            if (params.club_id !== undefined) {
+                requestBody.club_id = params.club_id;
+            }
+            if (params.status !== undefined) {
+                requestBody.status = params.status;
+            }
+            if (params.limit !== undefined) {
+                requestBody.limit = params.limit;
+            }
+            if (params.offset !== undefined) {
+                requestBody.offset = params.offset;
+            }
+
+            console.log('Fetching club join requests with body:', requestBody);
+
+            // Отправляем POST запрос с JSON телом
+            const response = await fetch('http://localhost:8080/club-join-requests/get', {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify(requestBody),
             });
 
             if (!response.ok) {
+                if (response.status === 403 && user?.role?.toLowerCase() === 'student') {
+                    throw new Error('У вас нет прав для просмотра чужих заявок');
+                }
                 throw new Error(`Ошибка загрузки: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('Club join requests response:', data);
 
             // Преобразуем данные из серверного формата в наш формат
             const formattedRequests: ClubJoinRequest[] = (data.club_join_requests || []).map((serverRequest: any) => ({
-                id: serverRequest.ID,
-                club_id: serverRequest.ClubID,
-                club_name: serverRequest.ClubName,
-                user_id: serverRequest.UserID,
-                user_name: serverRequest.UserName,
-                status: serverRequest.Status,
-                created_at: serverRequest.CreatedAt,
-                updated_at: serverRequest.UpdatedAt,
+                id: serverRequest.ID || serverRequest.id,
+                club_id: serverRequest.ClubID || serverRequest.club_id,
+                club_name: serverRequest.ClubName || serverRequest.club_name,
+                user_id: serverRequest.UserID || serverRequest.user_id,
+                user_name: serverRequest.UserName || serverRequest.user_name,
+                status: serverRequest.Status || serverRequest.status,
+                created_at: serverRequest.CreatedAt || serverRequest.created_at,
+                updated_at: serverRequest.UpdatedAt || serverRequest.updated_at,
             }));
 
             setRequests(formattedRequests);
         } catch (err) {
             console.error('Ошибка при загрузке заявок:', err);
-            setError('Не удалось загрузить данные о заявках');
+            setError(err instanceof Error ? err.message : 'Не удалось загрузить данные о заявках');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchRequests();
-    }, [params.club_id, params.user_id, params.status, params.limit, params.offset]);
+        if (user) {
+            fetchRequests();
+        }
+    }, [params.club_id, params.user_id, params.status, params.limit, params.offset, user?.id]);
 
     return {
         requests,

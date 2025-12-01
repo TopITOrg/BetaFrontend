@@ -40,17 +40,25 @@ export const useStudentClubs = (): UseStudentClubsResult => {
 
             console.log('Fetching student clubs for user:', user.id);
 
-            // Получаем заявки студента
+            // Получаем заявки студента - ИСПРАВЛЕНО на POST
             const token = localStorage.getItem('access_token');
             if (!token) {
                 throw new Error('No access token found');
             }
 
-            const responseRequests = await fetch(`http://localhost:8080/club-join-requests/get?user_id=${user.id}`, {
-                method: 'GET',
+            // Отправляем POST запрос с JSON телом
+            const responseRequests = await fetch('http://localhost:8080/club-join-requests/get', {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    // Можно добавить limit и offset если нужно
+                    limit: 100,
+                    offset: 0
+                }),
             });
 
             if (!responseRequests.ok) {
