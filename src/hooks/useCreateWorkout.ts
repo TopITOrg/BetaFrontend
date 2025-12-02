@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useState } from 'react';
 
 interface CreateWorkoutData {
     club_id: number;
@@ -7,7 +7,7 @@ interface CreateWorkoutData {
 }
 
 interface UseCreateWorkoutResult {
-    createWorkout: (data: CreateWorkoutData) => Promise<void>;
+    createWorkout: (data: CreateWorkoutData) => Promise<any>;
     loading: boolean;
     error: string | null;
 }
@@ -37,18 +37,42 @@ export const useCreateWorkout = (): UseCreateWorkoutResult => {
                 body: JSON.stringify(data),
             });
 
+            const responseText = await response.text();
+
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Backend error response:', errorText);
-                throw new Error(`Ошибка создания: ${response.status} - ${errorText}`);
+                console.error('Backend error response:', responseText);
+
+                let errorMessage = 'Не удалось создать тренировку';
+                try {
+                    // Пробуем распарсить JSON
+                    const errorJson = JSON.parse(responseText);
+                    if (errorJson.message) {
+                        errorMessage = errorJson.message;
+                    }
+                } catch {
+                    // Если не JSON, показываем как есть
+                    if (responseText) {
+                        errorMessage = responseText;
+                    }
+                }
+
+                throw new Error(`Ошибка ${response.status}: ${errorMessage}`);
             }
 
-            const result = await response.json();
-            console.log('Workout created successfully:', result);
+            // Пробуем распарсить успешный ответ
+            try {
+                const result = JSON.parse(responseText);
+                console.log('Workout created successfully:', result);
+                return result;
+            } catch (parseError) {
+                console.error('Failed to parse response:', parseError);
+                throw new Error('Некорректный ответ от сервера');
+            }
 
         } catch (err) {
             console.error('Ошибка при создании тренировки:', err);
-            setError('Не удалось создать тренировку');
+            const errorMessage = err instanceof Error ? err.message : 'Не удалось создать тренировку';
+            setError(errorMessage);
             throw err;
         } finally {
             setLoading(false);

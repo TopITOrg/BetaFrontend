@@ -76,7 +76,6 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
             return;
         }
 
-        // Правильный формат для бэкенда: ISO string
         const startDateTime = new Date(`${selectedDate}T${startTime}:00`).toISOString();
         const endDateTime = new Date(`${selectedDate}T${endTime}:00`).toISOString();
 
