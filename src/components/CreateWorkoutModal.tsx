@@ -1,7 +1,7 @@
 'use client';
-import {useEffect, useState} from 'react';
-import {X} from 'lucide-react';
-import {useClubs} from '@/hooks/useClubs';
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
+import { useClubs } from '@/hooks/useClubs';
 
 interface CreateWorkoutModalProps {
     isOpen: boolean;
@@ -10,14 +10,14 @@ interface CreateWorkoutModalProps {
     loading?: boolean;
 }
 
-export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}: CreateWorkoutModalProps) {
+export function CreateWorkoutModal({ isOpen, onClose, onCreate, loading = false }: CreateWorkoutModalProps) {
     const [selectedClub, setSelectedClub] = useState<number>(-1);
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [startTime, setStartTime] = useState<string>('');
     const [endTime, setEndTime] = useState<string>('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-    const {clubs: allClubs} = useClubs();
+    const { clubs: allClubs } = useClubs();
 
     // Фильтруем клубы с id
     const availableClubs = allClubs
@@ -26,6 +26,20 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
             id: club.id as number,
             name: club.title || 'Без названия'
         }));
+
+    // Генерация временных слотов с интервалом 30 минут (8:00 - 22:00)
+    const timeSlots = (() => {
+        const slots = [];
+        for (let hour = 8; hour <= 21; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                slots.push(timeString);
+            }
+        }
+        // Добавляем 22:00
+        slots.push('22:00');
+        return slots;
+    })();
 
     useEffect(() => {
         if (isOpen) {
@@ -36,8 +50,9 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
             } else {
                 setSelectedDate('');
             }
-            setStartTime('18:00');
-            setEndTime('19:30');
+            // Устанавливаем дефолтное время (16:00 - 17:30)
+            setStartTime('16:00');
+            setEndTime('17:30');
             setErrors({});
         }
     }, [isOpen]);
@@ -61,8 +76,36 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
             newErrors.endTime = 'Укажите время окончания';
         }
 
-        if (startTime && endTime && startTime >= endTime) {
-            newErrors.endTime = 'Время окончания должно быть позже времени начала';
+        if (startTime && endTime) {
+            const startParts = startTime.split(':');
+            const endParts = endTime.split(':');
+
+            const startHourStr = startParts[0];
+            const startMinuteStr = startParts[1];
+            const endHourStr = endParts[0];
+            const endMinuteStr = endParts[1];
+
+            if (startHourStr && startMinuteStr && endHourStr && endMinuteStr) {
+                const startHour = parseInt(startHourStr, 10);
+                const startMinute = parseInt(startMinuteStr, 10);
+                const endHour = parseInt(endHourStr, 10);
+                const endMinute = parseInt(endMinuteStr, 10);
+
+                const startTotal = startHour * 60 + startMinute;
+                const endTotal = endHour * 60 + endMinute;
+
+                if (endTotal <= startTotal) {
+                    newErrors.endTime = 'Время окончания должно быть позже времени начала';
+                }
+
+                if (endTotal - startTotal < 30) {
+                    newErrors.endTime = 'Тренировка должна длиться минимум 30 минут';
+                }
+
+                if (endTotal - startTotal > 240) {
+                    newErrors.endTime = 'Тренировка не может длиться более 4 часов';
+                }
+            }
         }
 
         setErrors(newErrors);
@@ -76,6 +119,7 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
             return;
         }
 
+        // Добавляем секунды для правильного формата
         const startDateTime = new Date(`${selectedDate}T${startTime}:00`).toISOString();
         const endDateTime = new Date(`${selectedDate}T${endTime}:00`).toISOString();
 
@@ -119,7 +163,7 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
                         disabled={loading}
                         type="button"
                     >
-                        <X size={20} className="text-gray-500"/>
+                        <X size={20} className="text-gray-500" />
                     </button>
                 </div>
 
@@ -134,7 +178,7 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
                             value={selectedClub}
                             onChange={(e) => {
                                 setSelectedClub(Number(e.target.value));
-                                if (errors.club) setErrors(prev => ({...prev, club: ''}));
+                                if (errors.club) setErrors(prev => ({ ...prev, club: '' }));
                             }}
                             className={`w-full rounded-xl border p-3 text-sm transition-colors ${
                                 errors.club
@@ -165,7 +209,7 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
                             value={selectedDate}
                             onChange={(e) => {
                                 setSelectedDate(e.target.value);
-                                if (errors.date) setErrors(prev => ({...prev, date: ''}));
+                                if (errors.date) setErrors(prev => ({ ...prev, date: '' }));
                             }}
                             className={`w-full rounded-xl border p-3 text-sm transition-colors ${
                                 errors.date
@@ -181,59 +225,145 @@ export function CreateWorkoutModal({isOpen, onClose, onCreate, loading = false}:
                         )}
                     </div>
 
-                    {/* Время начала и окончания */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Время начала *
-                            </label>
-                            <input
-                                type="time"
-                                value={startTime}
-                                onChange={(e) => {
-                                    setStartTime(e.target.value);
-                                    if (errors.startTime) setErrors(prev => ({...prev, startTime: ''}));
-                                }}
-                                className={`w-full rounded-xl border p-3 text-sm transition-colors ${
-                                    errors.startTime
-                                        ? 'border-red-300 bg-red-50'
-                                        : 'border-gray-300 hover:border-gray-400 focus:border-blue-500'
-                                }`}
-                                required
-                                disabled={loading}
-                            />
-                            {errors.startTime && (
-                                <p className="text-red-500 text-xs mt-1">{errors.startTime}</p>
-                            )}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Время окончания *
-                            </label>
-                            <input
-                                type="time"
-                                value={endTime}
-                                onChange={(e) => {
-                                    setEndTime(e.target.value);
-                                    if (errors.endTime) setErrors(prev => ({...prev, endTime: ''}));
-                                }}
-                                className={`w-full rounded-xl border p-3 text-sm transition-colors ${
-                                    errors.endTime
-                                        ? 'border-red-300 bg-red-50'
-                                        : 'border-gray-300 hover:border-gray-400 focus:border-blue-500'
-                                }`}
-                                required
-                                disabled={loading}
-                            />
-                            {errors.endTime && (
-                                <p className="text-red-500 text-xs mt-1">{errors.endTime}</p>
-                            )}
-                        </div>
+                    {/* Время начала */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Время начала *
+                        </label>
+                        <select
+                            value={startTime}
+                            onChange={(e) => {
+                                setStartTime(e.target.value);
+                                if (errors.startTime) setErrors(prev => ({ ...prev, startTime: '' }));
+                                // Автоматически установим время окончания (+1.5 часа)
+                                const timeValue = e.target.value;
+                                if (timeValue) {
+                                    const parts = timeValue.split(':');
+                                    const hoursStr = parts[0];
+                                    const minutesStr = parts[1];
+                                    if (hoursStr && minutesStr) {
+                                        const hours = parseInt(hoursStr, 10);
+                                        const minutes = parseInt(minutesStr, 10);
+                                        const totalMinutes = hours * 60 + minutes + 90;
+                                        const newHours = Math.floor(totalMinutes / 60);
+                                        const newMinutes = totalMinutes % 60;
+                                        const newTime = `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
+                                        if (timeSlots.includes(newTime)) {
+                                            setEndTime(newTime);
+                                        }
+                                    }
+                                }
+                            }}
+                            className={`w-full rounded-xl border p-3 text-sm transition-colors ${
+                                errors.startTime
+                                    ? 'border-red-300 bg-red-50'
+                                    : 'border-gray-300 hover:border-gray-400 focus:border-blue-500'
+                            }`}
+                            disabled={loading}
+                        >
+                            <option value="">Выберите время начала</option>
+                            {timeSlots.map((time) => (
+                                <option key={time} value={time}>
+                                    {time}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.startTime && (
+                            <p className="text-red-500 text-xs mt-1">{errors.startTime}</p>
+                        )}
                     </div>
+
+                    {/* Время окончания */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Время окончания *
+                        </label>
+                        <select
+                            value={endTime}
+                            onChange={(e) => {
+                                setEndTime(e.target.value);
+                                if (errors.endTime) setErrors(prev => ({ ...prev, endTime: '' }));
+                            }}
+                            className={`w-full rounded-xl border p-3 text-sm transition-colors ${
+                                errors.endTime
+                                    ? 'border-red-300 bg-red-50'
+                                    : 'border-gray-300 hover:border-gray-400 focus:border-blue-500'
+                            }`}
+                            disabled={loading}
+                        >
+                            <option value="">Выберите время окончания</option>
+                            {timeSlots
+                                .filter(time => {
+                                    if (!startTime) return true;
+                                    const startParts = startTime.split(':');
+                                    const endParts = time.split(':');
+
+                                    const startHourStr = startParts[0];
+                                    const startMinuteStr = startParts[1];
+                                    const endHourStr = endParts[0];
+                                    const endMinuteStr = endParts[1];
+
+                                    if (startHourStr && startMinuteStr && endHourStr && endMinuteStr) {
+                                        const startHour = parseInt(startHourStr, 10);
+                                        const startMinute = parseInt(startMinuteStr, 10);
+                                        const endHour = parseInt(endHourStr, 10);
+                                        const endMinute = parseInt(endMinuteStr, 10);
+                                        const startTotal = startHour * 60 + startMinute;
+                                        const endTotal = endHour * 60 + endMinute;
+                                        return endTotal > startTotal;
+                                    }
+                                    return true;
+                                })
+                                .map((time) => (
+                                    <option key={time} value={time}>
+                                        {time}
+                                    </option>
+                                ))}
+                        </select>
+                        {errors.endTime && (
+                            <p className="text-red-500 text-xs mt-1">{errors.endTime}</p>
+                        )}
+                    </div>
+
+                    {/* Продолжительность */}
+                    {startTime && endTime && (
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                            <p className="text-sm text-gray-700">
+                                Продолжительность:{' '}
+                                <span className="font-semibold">
+                                    {(() => {
+                                        const startParts = startTime.split(':');
+                                        const endParts = endTime.split(':');
+
+                                        const startHourStr = startParts[0];
+                                        const startMinuteStr = startParts[1];
+                                        const endHourStr = endParts[0];
+                                        const endMinuteStr = endParts[1];
+
+                                        if (startHourStr && startMinuteStr && endHourStr && endMinuteStr) {
+                                            const startHour = parseInt(startHourStr, 10);
+                                            const startMinute = parseInt(startMinuteStr, 10);
+                                            const endHour = parseInt(endHourStr, 10);
+                                            const endMinute = parseInt(endMinuteStr, 10);
+                                            const duration = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+                                            const hours = Math.floor(duration / 60);
+                                            const minutes = duration % 60;
+                                            if (hours > 0) {
+                                                return `${hours} ч${minutes > 0 ? ` ${minutes} мин` : ''}`;
+                                            } else {
+                                                return `${minutes} мин`;
+                                            }
+                                        }
+                                        return 'Неверный формат';
+                                    })()}
+                                </span>
+                            </p>
+                        </div>
+                    )}
 
                     {/* Подсказка */}
                     <div className="text-xs text-gray-500 mt-2">
-                        * Обязательные поля
+                        * Обязательные поля. Минимальная продолжительность: 30 минут
                     </div>
 
                     {/* Кнопки */}
