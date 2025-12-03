@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { CustomButton } from './CustomButton';
+import { Button } from "@/components/ui/button";
 import type { Workout } from '@/hooks/useWorkouts';
 
 interface EditWorkoutModalProps {
@@ -20,13 +20,27 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
 
     useEffect(() => {
         if (workout) {
-            const start = new Date(workout.start_date);
-            const end = new Date(workout.end_date);
+            try {
+                const start = new Date(workout.start_date);
+                const end = new Date(workout.end_date);
 
-            setSelectedDate(start.toISOString().split('T')[0] || '');
-            setStartTime(start.toTimeString().slice(0, 5) || '');
-            setEndTime(end.toTimeString().slice(0, 5) || '');
-            setCancelled(workout.cancelled);
+                // Проверяем, что даты валидны
+                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    console.error('Invalid date in workout:', workout);
+                    return;
+                }
+
+                setSelectedDate(start.toISOString().split('T')[0] || '');
+                setStartTime(
+                    `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`
+                );
+                setEndTime(
+                    `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`
+                );
+                setCancelled(workout.cancelled || false);
+            } catch (error) {
+                console.error('Error parsing workout dates:', error);
+            }
         }
     }, [workout]);
 
@@ -43,7 +57,6 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
             return;
         }
 
-        // Проверяем, что время начала раньше времени окончания
         if (startTime >= endTime) {
             alert('Время начала должно быть раньше времени окончания');
             return;
@@ -51,6 +64,13 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
 
         const startDateTime = `${selectedDate}T${startTime}:00`;
         const endDateTime = `${selectedDate}T${endTime}:00`;
+
+        const selectedDateTime = new Date(startDateTime);
+        if (selectedDateTime < new Date()) {
+            if (!window.confirm('Выбранная дата уже прошла. Вы уверены, что хотите сохранить изменения?')) {
+                return;
+            }
+        }
 
         onUpdate({
             id: workout.id,
@@ -68,7 +88,7 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full">
+            <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center p-6 border-b border-gray-200">
                     <h2 className="text-2xl font-bold text-gray-900">Редактировать тренировку</h2>
                     <button
@@ -90,7 +110,6 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                             onChange={(e) => setSelectedDate(e.target.value)}
                             className="w-full rounded-xl border-gray-300 border p-2"
                             required
-                            min={new Date().toISOString().split('T')[0]}
                         />
                     </div>
 
@@ -139,20 +158,26 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                        <CustomButton
-                            text="Отмена"
-                            isSelected={false}
+                        <Button
+                            variant="outline"
                             onClick={handleClose}
-                            width="50%"
+                            className="rounded-xl font-bold border-2 bg-white text-blue-500 border-blue-500
+                                hover:text-blue-500 hover:border-blue-500 hover:bg-gray-200 hover:scale-105
+                                transition-all duration-400 ease-in-out h-[40px] w-1/2"
                             type="button"
-                        />
-                        <CustomButton
-                            text={loading ? "Сохранение..." : "Сохранить"}
-                            isSelected={true}
-                            width="50%"
+                        >
+                            Отмена
+                        </Button>
+                        <Button
+                            onClick={handleSubmit}
+                            className="rounded-xl font-bold border-2 bg-blue-500 text-white border-blue-500
+                                hover:bg-blue-600 hover:border-blue-600 hover:text-white hover:scale-105
+                                transition-all duration-400 ease-in-out h-[40px] w-1/2"
                             type="submit"
                             disabled={loading}
-                        />
+                        >
+                            {loading ? "Сохранение..." : "Сохранить"}
+                        </Button>
                     </div>
                 </form>
             </div>

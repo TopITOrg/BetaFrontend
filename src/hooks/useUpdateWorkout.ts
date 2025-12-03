@@ -1,4 +1,5 @@
-import {useState} from 'react';
+'use client';
+import { useState } from 'react';
 
 interface UpdateWorkoutData {
     id: number;
@@ -37,11 +38,12 @@ export const useUpdateWorkout = (): UseUpdateWorkoutResult => {
             });
 
             if (!response.ok) {
-                throw new Error(`Ошибка обновления: ${response.status}`);
+                const errorText = await response.text();
+                throw new Error(`Ошибка обновления: ${response.status} - ${errorText}`);
             }
         } catch (err) {
             console.error('Ошибка при обновлении тренировки:', err);
-            setError('Не удалось обновить тренировку');
+            setError(err instanceof Error ? err.message : 'Не удалось обновить тренировку');
             throw err;
         } finally {
             setLoading(false);

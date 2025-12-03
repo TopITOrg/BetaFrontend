@@ -1,12 +1,14 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
-import type { Workout } from '@/hooks/useWorkouts';
-import { useClubs } from '@/hooks/useClubs';
-import { ChevronDown, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { CreateWorkoutModal } from './CreateWorkoutModal';
-import { useCreateWorkout } from '@/hooks/useCreateWorkout';
+import {useEffect, useMemo, useState} from 'react';
+import type {Workout} from '@/hooks/useWorkouts';
+import {useClubs} from '@/hooks/useClubs';
+import {ChevronDown, ChevronLeft, ChevronRight, Plus} from 'lucide-react';
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {Button} from "./ui/button";
+import {CreateWorkoutModal} from './CreateWorkoutModal';
+import {EditWorkoutModal} from './EditWorkoutModal';
+import {useCreateWorkout} from '@/hooks/useCreateWorkout';
+import {useUpdateWorkout} from '@/hooks/useUpdateWorkout';
 
 interface CalendarProps {
     workouts: Workout[];
@@ -18,18 +20,18 @@ interface CalendarProps {
 type ClubColor = { bg: string; border: string; text: string };
 
 const CLUB_COLORS: ClubColor[] = [
-    { bg: '#E7F6FD', border: '#0369a1', text: '#0369a1' },
-    { bg: '#F0FDF4', border: '#16a34a', text: '#16a34a' },
-    { bg: '#FEF3C7', border: '#d97706', text: '#d97706' },
-    { bg: '#FEE2E2', border: '#dc2626', text: '#dc2626' },
-    { bg: '#F3E8FF', border: '#7c3aed', text: '#7c3aed' },
-    { bg: '#FCE7F3', border: '#db2777', text: '#db2777' },
-    { bg: '#ECFCCB', border: '#65a30d', text: '#65a30d' },
-    { bg: '#CCFBF1', border: '#0d9488', text: '#0d9488' },
-    { bg: '#E0E7FF', border: '#4f46e5', text: '#4f46e5' },
-    { bg: '#FEF9C3', border: '#ca8a04', text: '#ca8a04' },
-    { bg: '#E0F2FE', border: '#0284c7', text: '#0284c7' },
-    { bg: '#F5F3FF', border: '#8b5cf6', text: '#8b5cf6' },
+    {bg: '#E7F6FD', border: '#0369a1', text: '#0369a1'},
+    {bg: '#F0FDF4', border: '#16a34a', text: '#16a34a'},
+    {bg: '#FEF3C7', border: '#d97706', text: '#d97706'},
+    {bg: '#FEE2E2', border: '#dc2626', text: '#dc2626'},
+    {bg: '#F3E8FF', border: '#7c3aed', text: '#7c3aed'},
+    {bg: '#FCE7F3', border: '#db2777', text: '#db2777'},
+    {bg: '#ECFCCB', border: '#65a30d', text: '#65a30d'},
+    {bg: '#CCFBF1', border: '#0d9488', text: '#0d9488'},
+    {bg: '#E0E7FF', border: '#4f46e5', text: '#4f46e5'},
+    {bg: '#FEF9C3', border: '#ca8a04', text: '#ca8a04'},
+    {bg: '#E0F2FE', border: '#0284c7', text: '#0284c7'},
+    {bg: '#F5F3FF', border: '#8b5cf6', text: '#8b5cf6'},
 ];
 
 export function Calendar({
@@ -41,9 +43,12 @@ export function Calendar({
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
 
-    const { clubs: allClubs } = useClubs();
-    const { createWorkout, loading: creatingWorkout } = useCreateWorkout();
+    const {clubs: allClubs} = useClubs();
+    const {createWorkout, loading: creatingWorkout} = useCreateWorkout();
+    const {updateWorkout, loading: updatingWorkout} = useUpdateWorkout();
 
     const clubsWithId = useMemo(() =>
             allClubs.filter((club): club is typeof club & { id: number } =>
@@ -70,20 +75,17 @@ export function Calendar({
         if (selectedClubId) {
             const club = clubsWithId.find(c => c.id === selectedClubId);
             if (club) {
-                // @ts-ignore
-                colorMap.set(club.id, CLUB_COLORS[0]);
+                colorMap.set(club.id, CLUB_COLORS[0] as ClubColor);
             }
         } else {
             clubsWithId.forEach((club, index) => {
-                // @ts-ignore
-                colorMap.set(club.id, CLUB_COLORS[index % CLUB_COLORS.length]);
+                colorMap.set(club.id, CLUB_COLORS[index % CLUB_COLORS.length] as ClubColor);
             });
         }
 
         return (clubId: number): ClubColor => {
             const color = colorMap.get(clubId);
-            // @ts-ignore
-            return color || CLUB_COLORS[0];
+            return color || CLUB_COLORS[0] as ClubColor;
         };
     }, [clubsWithId, selectedClubId]);
 
@@ -134,6 +136,29 @@ export function Calendar({
         }
     };
 
+    const handleUpdateWorkout = async (workoutData: {
+        id: number;
+        start_date?: string;
+        end_date?: string;
+        cancelled?: boolean
+    }) => {
+        try {
+            await updateWorkout(workoutData);
+            setIsEditModalOpen(false);
+            setSelectedWorkout(null);
+            if (refetch) {
+                refetch();
+            }
+        } catch (error) {
+            console.error('Ошибка при обновлении тренировки:', error);
+        }
+    };
+
+    const handleWorkoutClick = (workout: Workout) => {
+        setSelectedWorkout(workout);
+        setIsEditModalOpen(true);
+    };
+
     useEffect(() => {
         setCurrentWeek(getCurrentWeek(selectedDate));
     }, [selectedDate]);
@@ -173,7 +198,6 @@ export function Calendar({
                 const workoutStart = new Date(workout.start_date);
                 const workoutEnd = new Date(workout.end_date);
 
-                // Сравниваем только день и месяц
                 const workoutMonthDay = `${workoutStart.getMonth()}-${workoutStart.getDate()}`;
                 const currentMonthDay = `${day.getMonth()}-${day.getDate()}`;
 
@@ -234,7 +258,7 @@ export function Calendar({
                                 hover:text-blue-500 hover:border-blue-500 hover:bg-gray-200 hover:scale-105
                                 transition-all duration-400 ease-in-out h-[40px] w-[40px] p-0 flex items-center justify-center"
                         >
-                            <ChevronLeft className="h-4 w-4" />
+                            <ChevronLeft className="h-4 w-4"/>
                         </Button>
                         <Button
                             variant="outline"
@@ -243,7 +267,7 @@ export function Calendar({
                                 hover:text-blue-500 hover:border-blue-500 hover:bg-gray-200 hover:scale-105
                                 transition-all duration-400 ease-in-out h-[40px] w-[40px] p-0 flex items-center justify-center"
                         >
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-4 w-4"/>
                         </Button>
                     </div>
                 </div>
@@ -264,7 +288,7 @@ export function Calendar({
                                 <span>{selectedClubId ?
                                     clubsWithId.find(c => c.id === selectedClubId)?.title || `Секция ${selectedClubId}`
                                     : 'Все секции'}</span>
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="h-4 w-4"/>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-[190px]">
@@ -335,7 +359,8 @@ export function Calendar({
                                         min-w-[60px] h-[35px]
                                     ">
                                     <div className="flex flex-col items-center justify-center h-full">
-                                            <span className={`font-medium ${timeSlot.endsWith(':30') ? 'text-gray-400' : ''}`}>
+                                            <span
+                                                className={`font-medium ${timeSlot.endsWith(':30') ? 'text-gray-400' : ''}`}>
                                                 {timeSlot}
                                             </span>
                                     </div>
@@ -351,16 +376,24 @@ export function Calendar({
                                                     p-0 border border-gray-200
                                                     min-w-[90px] h-[35px] relative
                                                     group transition-colors duration-150
+                                                    ${trainingInfo ? 'cursor-pointer hover:bg-gray-50' : ''}
                                                 "
+                                            onClick={() => {
+                                                if (trainingInfo && trainingInfo.isStart) {
+                                                    handleWorkoutClick(trainingInfo.workout);
+                                                }
+                                            }}
                                         >
                                             {trainingInfo && (
                                                 <div
-                                                    className="
+                                                    className={`
                                                             absolute inset-0 flex items-start p-1
                                                             transition-all duration-200
                                                             hover:brightness-95 z-20
                                                             overflow-hidden
-                                                        "
+                                                            ${trainingInfo.workout.cancelled ? 'opacity-50' : ''}
+                                                            ${trainingInfo.isStart ? 'cursor-pointer' : ''}
+                                                        `}
                                                     style={{
                                                         backgroundColor: trainingInfo.color.bg,
                                                         borderLeftColor: trainingInfo.color.border,
@@ -376,13 +409,14 @@ export function Calendar({
                                                             <div className="flex flex-col">
                                                                 <div
                                                                     className="font-semibold truncate"
-                                                                    style={{ color: trainingInfo.color.text }}
+                                                                    style={{color: trainingInfo.color.text}}
                                                                 >
                                                                     {trainingInfo.workout.club_name}
+                                                                    {trainingInfo.workout.cancelled && ' (Отменена)'}
                                                                 </div>
                                                                 <div
                                                                     className="text-[10px] font-medium mt-0.5 truncate"
-                                                                    style={{ color: trainingInfo.color.text }}
+                                                                    style={{color: trainingInfo.color.text}}
                                                                 >
                                                                     {formatWorkoutTime(
                                                                         trainingInfo.workout.start_date,
@@ -395,7 +429,6 @@ export function Calendar({
                                                 </div>
                                             )}
 
-                                            {/* Полутон для продолжения тренировки */}
                                             {trainingInfo && !trainingInfo.isStart && (
                                                 <div
                                                     className="absolute inset-0"
@@ -427,7 +460,7 @@ export function Calendar({
                                     >
                                         <div
                                             className="w-3 h-3 rounded-full mr-2 flex-shrink-0"
-                                            style={{ backgroundColor: color.border }}
+                                            style={{backgroundColor: color.border}}
                                         />
                                         <span className="text-xs text-gray-700 truncate max-w-[120px]">
                                             {club.title}
@@ -453,7 +486,7 @@ export function Calendar({
                             hover:bg-blue-600 hover:border-blue-600 hover:text-white hover:scale-105
                             transition-all duration-400 ease-in-out h-[40px] px-6 shadow-md hover:shadow-lg"
                     >
-                        <Plus className="h-5 w-5 mr-2" />
+                        <Plus className="h-5 w-5 mr-2"/>
                         Создать тренировку
                     </Button>
                 </div>
@@ -473,6 +506,19 @@ export function Calendar({
                 onCreate={handleCreateWorkout}
                 loading={creatingWorkout}
             />
+
+            {selectedWorkout && (
+                <EditWorkoutModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedWorkout(null);
+                    }}
+                    onUpdate={handleUpdateWorkout}
+                    workout={selectedWorkout}
+                    loading={updatingWorkout}
+                />
+            )}
         </>
     );
 }
