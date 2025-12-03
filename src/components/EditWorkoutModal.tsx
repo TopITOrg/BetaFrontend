@@ -30,7 +30,11 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                     return;
                 }
 
-                setSelectedDate(start.toISOString().split('T')[0] || '');
+                // Форматируем дату для input[type="date"]
+                const localStart = new Date(start.getTime() - (start.getTimezoneOffset() * 60000));
+                setSelectedDate(localStart.toISOString().split('T')[0] || '');
+
+                // Форматируем время для input[type="time"]
                 setStartTime(
                     `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`
                 );
@@ -62,8 +66,12 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
             return;
         }
 
-        const startDateTime = `${selectedDate}T${startTime}:00`;
-        const endDateTime = `${selectedDate}T${endTime}:00`;
+        const startDateObj = new Date(`${selectedDate}T${startTime}:00`);
+        const endDateObj = new Date(`${selectedDate}T${endTime}:00`);
+
+
+        const startDateTime = startDateObj.toISOString().replace(/\.\d{3}Z$/, 'Z');
+        const endDateTime = endDateObj.toISOString().replace(/\.\d{3}Z$/, 'Z');
 
         const selectedDateTime = new Date(startDateTime);
         if (selectedDateTime < new Date()) {
