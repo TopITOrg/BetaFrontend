@@ -45,7 +45,6 @@ export default function Page() {
                     <h1 className="text-black font-bold text-4xl">Регистрация</h1>
 
                     <form className="flex flex-col items-center gap-4 w-full" onSubmit={handleSubmit}>
-                        {/* Full Name */}
                         <div className="relative w-full">
                             <input
                                 name="full_name"
@@ -58,7 +57,6 @@ export default function Page() {
                             <User className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
 
-                        {/* Telegram (Social Network Link) */}
                         <div className="relative w-full">
                             <input
                                 name="social_network_link"
@@ -71,7 +69,6 @@ export default function Page() {
                             <Send className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
 
-                        {/* Birth Date */}
 
                         <div className="relative w-full">
                             <input
@@ -90,7 +87,6 @@ export default function Page() {
                             />
                         </div>
 
-                        {/* Phone Number */}
                         <div className="relative w-full">
                             <input
                                 name="phone_number"
@@ -103,7 +99,6 @@ export default function Page() {
                             <Phone className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
 
-                        {/* Email */}
                         <div className="relative w-full">
                             <input
                                 name="email"
@@ -117,7 +112,6 @@ export default function Page() {
                             <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
 
-                        {/* Password */}
                         <div className="relative w-full">
                             <input
                                 name="password"

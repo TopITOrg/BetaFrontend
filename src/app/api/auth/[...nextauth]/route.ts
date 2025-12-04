@@ -24,10 +24,8 @@ export async function POST(request: NextRequest) {
 
         const data = await response.json()
 
-        // Сохраняем токены в cookies
         const nextResponse = NextResponse.json(data, { status: 201 })
 
-        // Устанавливаем access token в httpOnly cookie
         nextResponse.cookies.set('access_token', data.access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -35,7 +33,6 @@ export async function POST(request: NextRequest) {
             maxAge: 60 * 15, // 15 минут (как обычно для access token)
         })
 
-        // Устанавливаем refresh token в httpOnly cookie
         nextResponse.cookies.set('refresh_token', data.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

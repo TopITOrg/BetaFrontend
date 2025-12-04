@@ -41,7 +41,6 @@ export const Application: React.FC<ApplicationProps> = ({
         }
     };
 
-    // Исправляем проверку статуса - приводим к нижнему регистру
     const canModify = request.status.toLowerCase() === 'submitted';
 
     return (
@@ -59,7 +58,6 @@ export const Application: React.FC<ApplicationProps> = ({
                 </div>
             </div>
 
-            {/* Информация о заявке */}
             <div className="space-y-3 mb-6">
                 <div>
                     <p className="text-sm text-gray-600">Секция</p>
@@ -77,9 +75,7 @@ export const Application: React.FC<ApplicationProps> = ({
                 </div>
             </div>
 
-            {/* Кнопки действий */}
             {onWithdraw ? (
-                // Для студента - кнопка отзыва
                 <button
                     className={`w-full h-[40px] items-center justify-center rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105 ${
                         canModify
@@ -92,7 +88,6 @@ export const Application: React.FC<ApplicationProps> = ({
                     {isProcessing ? 'Обработка...' : 'Отозвать заявку'}
                 </button>
             ) : (
-                // Для тренера/админа - кнопки принятия/отклонения
                 <div className="flex gap-3">
                     <button
                         className={`flex-1 h-[40px] items-center justify-center rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105  ${
@@ -119,7 +114,6 @@ export const Application: React.FC<ApplicationProps> = ({
                 </div>
             )}
 
-            {/* Сообщение о невозможности изменения */}
             {!canModify && !onWithdraw && (
                 <p className="text-center text-sm text-gray-500 mt-3">
                     Заявка уже обработана

@@ -7,7 +7,6 @@ import { Profile } from '@/components/Profile';
 import { Navbar } from '@/components/navbar';
 import { useAuth } from '../../../contexts/AuthContext';
 
-// Компонент карточки участника
 const MemberCard: React.FC<{
     member: SectionMember;
     onClick: (member: SectionMember) => void
@@ -43,7 +42,6 @@ const MemberCard: React.FC<{
     );
 };
 
-// Строка таблицы
 const TableMemberRow: React.FC<{
     member: SectionMember;
     index: number;
@@ -78,14 +76,12 @@ const TableMemberRow: React.FC<{
     );
 };
 
-// Компонент контекстного меню (модального окна)
 const MemberContextMenu: React.FC<{
     member: SectionMember | null;
     onClose: () => void;
 }> = ({ member, onClose }) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Закрытие при нажатии Escape
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
@@ -97,7 +93,6 @@ const MemberContextMenu: React.FC<{
         return () => document.removeEventListener('keydown', handleEscape);
     }, [onClose]);
 
-    // Блокировка скролла фона
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => {
@@ -109,20 +104,17 @@ const MemberContextMenu: React.FC<{
 
     return (
         <>
-            {/* Затемнение фона */}
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-in fade-in duration-300"
                 onClick={onClose}
             />
 
-            {/* Модальное окно */}
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <div
                     ref={menuRef}
                     className="bg-white border-2 border-blue-400 rounded-2xl shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-300"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Заголовок */}
                     <div className="border-b border-gray-200 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="font-bold text-xl text-gray-800">Данные участника</h3>
@@ -136,9 +128,7 @@ const MemberContextMenu: React.FC<{
                         <p className="text-sm text-gray-600 mt-1">{member.club_name}</p>
                     </div>
 
-                    {/* Контент */}
                     <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-                        {/* Основная информация */}
                         <div className="space-y-4">
                             <div>
                                 <p className="text-sm text-gray-600 mb-1">ФИО участника</p>
@@ -186,7 +176,6 @@ const MemberContextMenu: React.FC<{
                             </div>
                         </div>
 
-                        {/* Дополнительная информация */}
                         <div className="pt-4 border-t border-gray-200">
                             <h4 className="font-medium text-gray-700 mb-3 text-lg">Дополнительно</h4>
                             <div className="space-y-3">
@@ -207,7 +196,6 @@ const MemberContextMenu: React.FC<{
                         </div>
                     </div>
 
-                    {/* Футер */}
                     <div className="border-t border-gray-200 p-4 flex justify-end rounded-b-2xl">
                         <button
                             onClick={onClose}
@@ -240,12 +228,10 @@ export default function ClubMembersPage() {
     const freePlaces = Math.max(0, (totalPlaces || 0) - takenPlaces);
     const fillPercentage = totalPlaces > 0 ? Math.min((takenPlaces / totalPlaces) * 100, 100) : 0;
 
-    // Обработчик клика по участнику
     const handleMemberClick = (member: SectionMember) => {
         setSelectedMember(member);
     };
 
-    // Автовыбор первой секции
     useEffect(() => {
         if (teacherClubs && teacherClubs.length > 0 && !selectedClubId) {
             const firstClub = teacherClubs[0];
@@ -261,7 +247,6 @@ export default function ClubMembersPage() {
         setSelectedClubName(clubName);
     };
 
-    // Статус загрузки
     if (clubsLoading) {
         return (
             <div className="min-h-screen">
@@ -276,7 +261,6 @@ export default function ClubMembersPage() {
         );
     }
 
-    // Нет секций
     if (!teacherClubs || teacherClubs.length === 0) {
         return (
             <div className="min-h-screen">
@@ -303,18 +287,14 @@ export default function ClubMembersPage() {
             <Navbar />
 
             <div className="flex min-h-[calc(100vh-70px)]">
-                {/* Боковая панель */}
                 <Profile />
 
-                {/* Основной контент */}
                 <div className="flex-1 p-6">
-                    {/* Заголовок */}
                     <div className="mb-6">
                         <h1 className="text-2xl font-bold text-gray-800 mb-2">Участники секций</h1>
                         <p className="text-gray-600">Нажмите на карточку участника для просмотра подробной информации</p>
                     </div>
 
-                    {/* Выбор секции */}
                     <div className="mb-6">
                         <h2 className="text-lg font-semibold text-gray-800 mb-3">Выберите секцию</h2>
                         <div className="flex flex-wrap gap-2">
@@ -337,7 +317,6 @@ export default function ClubMembersPage() {
                         </div>
                     </div>
 
-                    {/* Отображение участников */}
                     {selectedClubId && (
                         <div>
                             <div className="flex items-center justify-between mb-4">
@@ -346,7 +325,6 @@ export default function ClubMembersPage() {
                                         {selectedClubName} • Участников: {members.length}
                                     </h2>
 
-                                    {/* Прогресс-бар занятости */}
                                     {totalPlaces > 0 && (
                                         <div className="mt-2">
                                             <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
@@ -369,7 +347,6 @@ export default function ClubMembersPage() {
                                     )}
                                 </div>
 
-                                {/* Переключатель вида */}
                                 <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
                                     <button
                                         onClick={() => setViewMode('grid')}
@@ -410,7 +387,6 @@ export default function ClubMembersPage() {
                                 </div>
                             </div>
 
-                            {/* Состояния загрузки и ошибки */}
                             {membersLoading ? (
                                 <div className="flex justify-center py-12">
                                     <div className="text-gray-600 animate-pulse">Загрузка участников...</div>
@@ -520,7 +496,6 @@ export default function ClubMembersPage() {
                 </div>
             </div>
 
-            {/* Контекстное меню (модальное окно) */}
             <MemberContextMenu
                 member={selectedMember}
                 onClose={() => setSelectedMember(null)}

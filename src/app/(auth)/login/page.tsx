@@ -28,7 +28,6 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen bg-blue-500">
 
-            {/* Кнопка возврата на главную - в левом верхнем углу */}
             <Link
                 href="/"
                 className="absolute top-6 left-6 z-10 flex items-center gap-2 text-white bg-blue-500 rounded-xl p-2 px-4
@@ -84,7 +83,6 @@ export default function LoginPage() {
                             {isPending ? 'Вход...' : 'Войти'}
                         </button>
 
-                        {/* Отображение ошибок */}
                         {error && (
                             <div className="text-red-500 text-sm text-center">
                                 {error.message?.includes('Email or password')
