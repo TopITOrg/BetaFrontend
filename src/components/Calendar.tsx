@@ -9,6 +9,7 @@ import {CreateWorkoutModal} from './CreateWorkoutModal';
 import {EditWorkoutModal} from './EditWorkoutModal';
 import {useCreateWorkout} from '@/hooks/useCreateWorkout';
 import {useUpdateWorkout} from '@/hooks/useUpdateWorkout';
+import {useAuth} from '../../contexts/AuthContext';
 
 interface CalendarProps {
     workouts: Workout[];
@@ -49,6 +50,10 @@ export function Calendar({
     const {clubs: allClubs} = useClubs();
     const {createWorkout, loading: creatingWorkout} = useCreateWorkout();
     const {updateWorkout, loading: updatingWorkout} = useUpdateWorkout();
+
+    // Добавляем useAuth для получения роли пользователя
+    const {user} = useAuth();
+    const isStudent = user?.role === 'Student';
 
     const clubsWithId = useMemo(() =>
             allClubs.filter((club): club is typeof club & { id: number } =>
@@ -125,6 +130,12 @@ export function Calendar({
     };
 
     const handleCreateWorkout = async (workoutData: { club_id: number; start_date: string; end_date: string }) => {
+        // Проверяем, что пользователь не студент
+        if (isStudent) {
+            alert('У студентов нет прав на создание тренировок');
+            return;
+        }
+
         try {
             await createWorkout(workoutData);
             setIsCreateModalOpen(false);
@@ -142,6 +153,11 @@ export function Calendar({
         end_date?: string;
         cancelled?: boolean
     }) => {
+        if (isStudent) {
+            alert('У студентов нет прав на редактирование тренировок');
+            return;
+        }
+
         try {
             await updateWorkout(workoutData);
             setIsEditModalOpen(false);
@@ -155,6 +171,10 @@ export function Calendar({
     };
 
     const handleWorkoutClick = (workout: Workout) => {
+        // Если пользователь студент, не открываем модальное окно редактирования
+        if (isStudent) {
+            return;
+        }
         setSelectedWorkout(workout);
         setIsEditModalOpen(true);
     };
@@ -372,14 +392,14 @@ export function Calendar({
                                     return (
                                         <td
                                             key={dayIndex}
-                                            className="
+                                            className={`
                                                     p-0 border border-gray-200
                                                     min-w-[90px] h-[35px] relative
                                                     group transition-colors duration-150
-                                                    ${trainingInfo ? 'cursor-pointer hover:bg-gray-50' : ''}
-                                                "
+                                                    ${trainingInfo && trainingInfo.isStart && !isStudent ? 'cursor-pointer hover:bg-gray-50' : 'cursor-default'}
+                                                `}
                                             onClick={() => {
-                                                if (trainingInfo && trainingInfo.isStart) {
+                                                if (trainingInfo && trainingInfo.isStart && !isStudent) {
                                                     handleWorkoutClick(trainingInfo.workout);
                                                 }
                                             }}
@@ -389,17 +409,17 @@ export function Calendar({
                                                     className={`
                                                             absolute inset-0 flex items-start p-1
                                                             transition-all duration-200
-                                                            hover:brightness-95 z-20
+                                                            ${!isStudent && trainingInfo.isStart ? 'hover:brightness-95' : ''}
                                                             overflow-hidden
                                                             ${trainingInfo.workout.cancelled ? 'opacity-50' : ''}
-                                                            ${trainingInfo.isStart ? 'cursor-pointer' : ''}
+                                                            ${trainingInfo.isStart && !isStudent ? 'cursor-pointer' : 'cursor-default'}
                                                         `}
                                                     style={{
                                                         backgroundColor: trainingInfo.color.bg,
                                                         borderLeftColor: trainingInfo.color.border,
                                                         borderLeftWidth: '3px',
                                                         zIndex: trainingInfo.isStart ? 30 : 20,
-                                                        ...(trainingInfo.isStart && {
+                                                        ...(trainingInfo.isStart && !isStudent && {
                                                             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                                                         })
                                                     }}
@@ -479,17 +499,20 @@ export function Calendar({
                     </div>
                 )}
 
-                <div className="flex justify-center mt-6">
-                    <Button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="rounded-xl font-bold border-2 bg-blue-500 text-white border-blue-500
-                            hover:bg-blue-600 hover:border-blue-600 hover:text-white hover:scale-105
-                            transition-all duration-400 ease-in-out h-[40px] px-6 shadow-md hover:shadow-lg"
-                    >
-                        <Plus className="h-5 w-5 mr-2"/>
-                        Создать тренировку
-                    </Button>
-                </div>
+                {/* Скрываем кнопку создания тренировки для студентов */}
+                {!isStudent && (
+                    <div className="flex justify-center mt-6">
+                        <Button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="rounded-xl font-bold border-2 bg-blue-500 text-white border-blue-500
+                                hover:bg-blue-600 hover:border-blue-600 hover:text-white hover:scale-105
+                                transition-all duration-400 ease-in-out h-[40px] px-6 shadow-md hover:shadow-lg"
+                        >
+                            <Plus className="h-5 w-5 mr-2"/>
+                            Создать тренировку
+                        </Button>
+                    </div>
+                )}
 
                 {workouts.length === 0 && (
                     <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -500,14 +523,17 @@ export function Calendar({
                 )}
             </div>
 
-            <CreateWorkoutModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onCreate={handleCreateWorkout}
-                loading={creatingWorkout}
-            />
+            {/* Модальное окно создания тренировки отображается только если пользователь не студент */}
+            {!isStudent && (
+                <CreateWorkoutModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onCreate={handleCreateWorkout}
+                    loading={creatingWorkout}
+                />
+            )}
 
-            {selectedWorkout && (
+            {selectedWorkout && !isStudent && (
                 <EditWorkoutModal
                     isOpen={isEditModalOpen}
                     onClose={() => {

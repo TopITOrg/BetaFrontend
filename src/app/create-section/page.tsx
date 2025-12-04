@@ -180,8 +180,36 @@ export default function CreateSectionPage() {
                                 <option value={1}>Футбол</option>
                                 <option value={2}>Баскетбол</option>
                                 <option value={3}>Волейбол</option>
-                                <option value={4}>Теннис</option>
+                                <option value={4}>Большой теннис</option>
                                 <option value={5}>Плавание</option>
+                                <option value={6}>Академическая гребля</option>
+                                <option value={7}>Аэробика</option>
+                                <option value={8}>Бадминтон</option>
+                                <option value={9}>Настольный теннис</option>
+                                <option value={10}>Скалолазание</option>
+                                <option value={11}>Гандбол</option>
+                                <option value={12}>Мини-футбол</option>
+                                <option value={13}>Бокс</option>
+                                <option value={14}>Перетягивание каната</option>
+                                <option value={15}>Пулевая стрельба</option>
+                                <option value={16}>Спортивный туризм</option>
+                                <option value={17}>ММА</option>
+                                <option value={18}>Пауэрлифтинг</option>
+                                <option value={19}>Тяжёлая атлетика</option>
+                                <option value={20}>Гиревой спорт</option>
+                                <option value={21}>Артистическое фехтование</option>
+                                <option value={22}>Авиамодельный спорт</option>
+                                <option value={23}>Бильярдный спорт</option>
+                                <option value={24}>Киберспорт</option>
+                                <option value={25}>Лёгкая атлетика</option>
+                                <option value={26}>Плавание</option>
+                                <option value={27}>Подводное плавание</option>
+                                <option value={28}>Регби</option>
+                                <option value={29}>Спортивное ориентирование</option>
+                                <option value={30}>Хоккей</option>
+                                <option value={31}>Шахматы</option>
+                                <option value={32}>Чирлидинг</option>
+
                             </select>
                         </div>
                     </div>
