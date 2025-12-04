@@ -28,7 +28,6 @@ export default function CreateSectionPage() {
         try {
             const token = localStorage.getItem('access_token');
 
-            // Подготавливаем данные в правильном формате
             const requestData = {
                 name: formData.name,
                 description: formData.description,
@@ -82,7 +81,6 @@ export default function CreateSectionPage() {
 
     return (
         <main className="flex flex-col min-h-screen bg-white">
-            {/* Убираем выделение навбара */}
             <Navbar selectedButton={-1} />
 
             <div className="flex-1 p-8 max-w-4xl mx-auto w-full">

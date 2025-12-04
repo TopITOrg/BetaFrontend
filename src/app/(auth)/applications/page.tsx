@@ -15,22 +15,18 @@ export default function ApplicationsPage() {
     const {updateRequest, loading: updateLoading} = useUpdateClubJoinRequest();
     const {clubs: teacherClubs, loading: teacherClubsLoading} = useTeacherClubs();
 
-    // Для студента - его заявки
     const studentRequests = useClubJoinRequests(
         user?.role?.toLowerCase() === 'student' ? {user_id: user?.id} : {}
     );
 
-    // Для тренера - все заявки (будем фильтровать на фронтенде)
     const teacherRequests = useClubJoinRequests(
         user?.role?.toLowerCase() === 'teacher' ? {} : {}
     );
 
-    // Для админа - все заявки
     const adminRequests = useClubJoinRequests(
         user?.role?.toLowerCase() === 'admin' ? {} : {}
     );
 
-    // Фильтруем заявки для тренера (только его секции)
     const filteredTeacherRequests = useMemo(() => {
         if (user?.role?.toLowerCase() !== 'teacher') return [];
         if (teacherClubsLoading) return [];
@@ -41,7 +37,6 @@ export default function ApplicationsPage() {
         );
     }, [teacherRequests.requests, teacherClubs, user?.role, teacherClubsLoading]);
 
-    // Выбираем правильный набор заявок в зависимости от роли
     const getRequests = (): ClubJoinRequest[] => {
         switch (user?.role?.toLowerCase()) {
             case 'student':

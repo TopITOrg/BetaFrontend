@@ -6,17 +6,13 @@ import Image from "next/image";
 export default function HomePage() {
     return (
         <main className="flex flex-col min-h-screen">
-            {/* Закрепленный navbar */}
             <div className="sticky top-0 z-50 bg-white">
                 <Navbar selectedButton={0} />
             </div>
 
-            {/* Основной контент */}
             <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100">
                 <div className="max-w-6xl w-full">
-                    {/* Верхняя секция с изображением и текстом */}
                     <div className="flex flex-col lg:flex-row items-center gap-12 mb-16">
-                        {/* Изображение */}
                         <div className="flex-shrink-0">
                             <div className="relative w-64 h-64 lg:w-80 lg:h-80 rounded-2xl overflow-hidden shadow-2xl">
                                 <Image
@@ -29,7 +25,6 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        {/* Текст справа */}
                         <div className="flex-1 text-left">
                             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
                                 <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-6 text-center lg:text-left">
@@ -48,7 +43,6 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Нижняя информационная секция */}
                     <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto border border-gray-100">
                         <div className="text-center space-y-6">
                             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">

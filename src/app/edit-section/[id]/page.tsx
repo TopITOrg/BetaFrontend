@@ -20,9 +20,7 @@ interface FormData {
 export default function EditSectionPage() {
     const params = useParams();
     const router = useRouter();
-    // Используем хук для получения всех секций тренера
     const {clubs, loading, error, refetch} = useTeacherClubs();
-    // Находим нужную секцию по ID из параметров
     const club = clubs.find(c => c.id === Number(params.id));
 
     const [updating, setUpdating] = useState(false);
@@ -38,7 +36,6 @@ export default function EditSectionPage() {
         required_workout_per_week: 0,
     });
 
-    // Заполняем форму данными клуба при загрузке
     useEffect(() => {
         if (club) {
             setFormData({
@@ -51,7 +48,6 @@ export default function EditSectionPage() {
         }
     }, [club]);
 
-    // Обработка изменения формы
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const {name, value} = e.target;
         setFormData(prev => ({
@@ -87,14 +83,12 @@ export default function EditSectionPage() {
                     : undefined,
             };
 
-            // Удаляем undefined поля
             Object.keys(updateData).forEach(key => {
                 if (updateData[key as keyof typeof updateData] === undefined) {
                     delete updateData[key as keyof typeof updateData];
                 }
             });
 
-            // Если нет изменений
             if (Object.keys(updateData).length === 0) {
                 setSuccess('Нет изменений для сохранения');
                 setUpdating(false);
@@ -116,7 +110,7 @@ export default function EditSectionPage() {
             }
 
             setSuccess('Секция успешно обновлена!');
-            await refetch(); // Обновляем данные секций
+            await refetch();
         } catch (err) {
             console.error('Ошибка при обновлении:', err);
             alert(err instanceof Error ? err.message : 'Произошла ошибка при обновлении секции');
@@ -208,7 +202,6 @@ export default function EditSectionPage() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4 w-full max-w-md">
-                        {/* Название */}
                         <div className="relative w-full">
                             <Input
                                 name="name"
@@ -223,7 +216,6 @@ export default function EditSectionPage() {
                                  size={20}/>
                         </div>
 
-                        {/* Описание */}
                         <div className="relative w-full">
               <textarea
                   name="description"
@@ -238,7 +230,6 @@ export default function EditSectionPage() {
                             <FileText className="absolute right-3 top-3 text-gray-500" size={20}/>
                         </div>
 
-                        {/* Место проведения */}
                         <div className="relative w-full">
                             <Input
                                 name="place"
@@ -253,7 +244,6 @@ export default function EditSectionPage() {
                                     size={20}/>
                         </div>
 
-                        {/* Тренер (только чтение) */}
                         <div className="relative w-full">
                             <Input
                                 placeholder="Тренер"
@@ -265,7 +255,6 @@ export default function EditSectionPage() {
                                   size={20}/>
                         </div>
 
-                        {/* Тренировок в неделю */}
                         <div className="relative w-full">
                             <Input
                                 name="required_workout_per_week"
@@ -282,7 +271,6 @@ export default function EditSectionPage() {
                                       size={20}/>
                         </div>
 
-                        {/* Уровень обучения (только чтение) */}
                         <div className="relative w-full">
                             <Input
                                 placeholder="Уровень обучения"
@@ -294,7 +282,6 @@ export default function EditSectionPage() {
                                            size={20}/>
                         </div>
 
-                        {/* Количество мест */}
                         <div className="relative w-full">
                             <Input
                                 name="total_places"
@@ -310,7 +297,6 @@ export default function EditSectionPage() {
                                    size={20}/>
                         </div>
 
-                        {/* Вид спорта (только чтение) */}
                         <div className="relative w-full">
                             <Input
                                 placeholder="Вид спорта"
@@ -348,7 +334,6 @@ export default function EditSectionPage() {
                 </div>
             </div>
 
-            {/* Модальное окно подтверждения удаления */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 max-w-sm mx-4">

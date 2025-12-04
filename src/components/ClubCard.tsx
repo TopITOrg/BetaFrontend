@@ -19,7 +19,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
     const [showDetails, setShowDetails] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Функция для расчета свободных мест
     const getFreePlaces = () => {
         const total = clubData.totalPlaces || 0;
         const taken = clubData.takenPlaces || 0;
@@ -29,14 +28,12 @@ function ClubCard({clubData}: { clubData: ClubData }) {
 
     const freePlaces = getFreePlaces();
 
-    // Функция для расчета процента заполнения
     const calculateFillPercentage = () => {
         if (!clubData.totalPlaces || clubData.totalPlaces === 0) return 0;
         const taken = clubData.takenPlaces || 0;
         return Math.min((taken / clubData.totalPlaces) * 100, 100);
     };
 
-    // Функция для определения цвета в зависимости от доступности мест
     const getAvailabilityColor = () => {
         if (!clubData.totalPlaces || clubData.totalPlaces === 0) return 'gray';
         if (freePlaces === 0) return 'red';
@@ -46,7 +43,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
 
     const availabilityColor = getAvailabilityColor();
 
-    // Функция для получения классов цвета
     const getColorClasses = (color: string, type: 'bg' | 'text' = 'bg') => {
         switch (color) {
             case 'red':
@@ -148,7 +144,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                     </div>
 
                     <div className="space-y-2 mt-auto">
-                        {/* Блок с информацией о местах и прогресс-баром */}
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
                                 <div className={`w-3 h-3 rounded-full ${getColorClasses(availabilityColor, 'bg')}`}></div>
@@ -159,7 +154,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                 </span>
                             </div>
 
-                            {/* Прогресс-бар */}
                             {clubData.totalPlaces && clubData.totalPlaces > 0 && (
                                 <div className="relative pt-1">
                                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -199,11 +193,9 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                 </div>
             </div>
 
-            {/* Модальное окно с подробной информацией */}
             {showDetails && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        {/* Заголовок и кнопка закрытия */}
                         <div className="flex justify-between items-center p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">{clubData.title}</h2>
                             <button
@@ -214,9 +206,7 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                             </button>
                         </div>
 
-                        {/* Содержимое модального окна */}
                         <div className="p-6 space-y-6">
-                            {/* Вид спорта */}
                             {clubData.sportType && (
                                 <div className="flex items-center gap-3">
                                     <Activity className="text-blue-500" size={20}/>
@@ -227,7 +217,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                 </div>
                             )}
 
-                            {/* Уровень подготовки */}
                             <div className="flex items-center gap-3">
                                 <div
                                     className={`px-3 py-1 rounded-full border ${getSkillLevelColor(clubData.skillLevel)}`}>
@@ -236,7 +225,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                 <span className="text-sm text-gray-600">Уровень подготовки</span>
                             </div>
 
-                            {/* Основная информация с прогресс-баром */}
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-3">
@@ -249,7 +237,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                         </div>
                                     </div>
 
-                                    {/* Прогресс-бар в модальном окне */}
                                     {clubData.totalPlaces && clubData.totalPlaces > 0 && (
                                         <div className="pl-9">
                                             <div className="w-full bg-gray-200 rounded-full h-3">
@@ -284,7 +271,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                 </div>
                             </div>
 
-                            {/* Описание секции */}
                             <div>
                                 <div className="flex items-center gap-2 mb-3">
                                     <Info className="text-gray-500" size={20}/>
@@ -298,7 +284,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                             </div>
                         </div>
 
-                        {/* Кнопка подачи заявки */}
                         <div className="p-6 border-t border-gray-200">
                             <CustomButton
                                 text={isSubmitting ? "Отправка..." : "Подать заявку"}
@@ -308,7 +293,6 @@ function ClubCard({clubData}: { clubData: ClubData }) {
                                 disabled={isSubmitting || freePlaces === 0}
                             />
 
-                            {/* Сообщение если мест нет */}
                             {freePlaces === 0 && (
                                 <p className="text-red-500 text-sm mt-2 text-center">
                                     Все места заняты. Заявки временно не принимаются.
