@@ -28,7 +28,7 @@ export const useCreateWorkout = (): UseCreateWorkoutResult => {
 
             console.log('Creating workout with data:', data);
 
-            const response = await fetch('http://localhost:8080/workouts/create', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/workouts/create`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

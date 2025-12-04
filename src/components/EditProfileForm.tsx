@@ -126,7 +126,7 @@ export function EditProfileForm() {
                 return;
             }
 
-            const response = await fetch('http://localhost:8080/users/update', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/users/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ export function EditProfileForm() {
                 return;
             }
 
-            const response = await fetch('http://localhost:8080/users/delete', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/users/delete`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

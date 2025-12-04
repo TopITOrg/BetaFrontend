@@ -41,7 +41,7 @@ export default function CreateSectionPage() {
 
             console.log('Sending request data:', requestData);
 
-            const response = await fetch('http://localhost:8080/clubs/create', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/clubs/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

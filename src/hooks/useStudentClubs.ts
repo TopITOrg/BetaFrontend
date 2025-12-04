@@ -47,7 +47,7 @@ export const useStudentClubs = (): UseStudentClubsResult => {
             }
 
             // Отправляем POST запрос с JSON телом
-            const responseRequests = await fetch('http://localhost:8080/club-join-requests/get', {
+            const responseRequests = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/club-join-requests/get`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

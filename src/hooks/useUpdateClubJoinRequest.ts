@@ -20,7 +20,7 @@ export const useUpdateClubJoinRequest = (): UseUpdateClubJoinRequestResult => {
                 throw new Error('No access token found');
             }
 
-            const response = await fetch(`http://localhost:8080/club-join-requests/${requestId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/club-join-requests/${requestId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

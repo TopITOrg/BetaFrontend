@@ -33,7 +33,7 @@ export const useClubs = (): UseClubsResult => {
                 return;
             }
 
-            const response = await fetch('http://localhost:8080/clubs/', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/clubs/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

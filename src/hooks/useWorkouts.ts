@@ -35,7 +35,7 @@ export const useWorkouts = (clubId?: number): UseWorkoutsResult => {
                 throw new Error('No access token found');
             }
 
-            const response = await fetch('http://localhost:8080/workouts/getByClub', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/workouts/getByClub`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
