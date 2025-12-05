@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import type { Workout } from '@/hooks/useWorkouts';
+import {useEffect, useState} from 'react';
+import {X} from 'lucide-react';
+import {Button} from "@/components/ui/button";
+import type {Workout} from '@/hooks/useWorkouts';
 
 interface EditWorkoutModalProps {
     isOpen: boolean;
@@ -12,11 +12,12 @@ interface EditWorkoutModalProps {
     loading?: boolean;
 }
 
-export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading = false }: EditWorkoutModalProps) {
+export function EditWorkoutModal({isOpen, onClose, onUpdate, workout, loading = false}: EditWorkoutModalProps) {
     const [selectedDate, setSelectedDate] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [cancelled, setCancelled] = useState(false);
+    const [dateError, setDateError] = useState<string | null>(null);
 
     useEffect(() => {
         if (workout) {
@@ -32,7 +33,8 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
 
                 // Форматируем дату для input[type="date"]
                 const localStart = new Date(start.getTime() - (start.getTimezoneOffset() * 60000));
-                setSelectedDate(localStart.toISOString().split('T')[0] || '');
+                const dateValue = localStart.toISOString().split('T')[0] || '';
+                setSelectedDate(dateValue);
 
                 // Форматируем время для input[type="time"]
                 setStartTime(
@@ -42,43 +44,80 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                     `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`
                 );
                 setCancelled(workout.cancelled || false);
+
+                // Проверяем, не прошла ли исходная дата тренировки
+                checkDateValidity(dateValue, startTime);
             } catch (error) {
                 console.error('Error parsing workout dates:', error);
             }
         }
     }, [workout]);
 
+    const checkDateValidity = (date: string, time: string) => {
+        if (!date || !time) return;
+
+        const selectedDateTime = new Date(`${date}T${time}:00`);
+        const now = new Date();
+
+        if (selectedDateTime < now) {
+            setDateError('Нельзя установить дату тренировки в прошлом. Пожалуйста, выберите дату в будущем.');
+        } else {
+            setDateError(null);
+        }
+    };
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newDate = e.target.value;
+        setSelectedDate(newDate);
+        checkDateValidity(newDate, startTime);
+    };
+
+    const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTime = e.target.value;
+        setStartTime(newTime);
+        checkDateValidity(selectedDate, newTime);
+    };
+
+    const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTime = e.target.value;
+        setEndTime(newTime);
+        if (!dateError) {
+            // Если нет других ошибок, очищаем сообщение
+            setDateError(null);
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!selectedDate) {
-            alert('Выберите дату тренировки');
+            setDateError('Выберите дату тренировки');
             return;
         }
 
         if (!startTime || !endTime) {
-            alert('Укажите время начала и окончания');
+            setDateError('Укажите время начала и окончания');
             return;
         }
 
         if (startTime >= endTime) {
-            alert('Время начала должно быть раньше времени окончания');
+            setDateError('Время начала должно быть раньше времени окончания');
+            return;
+        }
+
+        const selectedDateTime = new Date(`${selectedDate}T${startTime}:00`);
+        const now = new Date();
+
+        if (selectedDateTime < now) {
+            setDateError('Нельзя установить дату тренировки в прошлом. Пожалуйста, выберите будущую дату.');
             return;
         }
 
         const startDateObj = new Date(`${selectedDate}T${startTime}:00`);
         const endDateObj = new Date(`${selectedDate}T${endTime}:00`);
 
-
         const startDateTime = startDateObj.toISOString().replace(/\.\d{3}Z$/, 'Z');
         const endDateTime = endDateObj.toISOString().replace(/\.\d{3}Z$/, 'Z');
-
-        const selectedDateTime = new Date(startDateTime);
-        if (selectedDateTime < new Date()) {
-            if (!window.confirm('Выбранная дата уже прошла. Вы уверены, что хотите сохранить изменения?')) {
-                return;
-            }
-        }
 
         onUpdate({
             id: workout.id,
@@ -89,6 +128,7 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
     };
 
     const handleClose = () => {
+        setDateError(null);
         onClose();
     };
 
@@ -103,7 +143,7 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                         onClick={handleClose}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-300 flex items-center justify-center"
                     >
-                        <X size={20} className="text-gray-600" />
+                        <X size={20} className="text-gray-600"/>
                     </button>
                 </div>
 
@@ -115,8 +155,8 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                         <input
                             type="date"
                             value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            className="w-full rounded-xl border-gray-300 border p-2"
+                            onChange={handleDateChange}
+                            className={`w-full rounded-xl border ${dateError && dateError.includes('Нельзя установить дату тренировки в прошлом') ? 'border-red-500' : 'border-gray-300'} p-2`}
                             required
                         />
                     </div>
@@ -129,8 +169,8 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                             <input
                                 type="time"
                                 value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                                className="w-full rounded-xl border-gray-300 border p-2"
+                                onChange={handleStartTimeChange}
+                                className={`w-full rounded-xl border ${dateError && dateError.includes('Время начала') ? 'border-red-500' : 'border-gray-300'} p-2`}
                                 required
                             />
                         </div>
@@ -141,12 +181,18 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                             <input
                                 type="time"
                                 value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
-                                className="w-full rounded-xl border-gray-300 border p-2"
+                                onChange={handleEndTimeChange}
+                                className={`w-full rounded-xl border ${dateError && dateError.includes('Время начала') ? 'border-red-500' : 'border-gray-300'} p-2`}
                                 required
                             />
                         </div>
                     </div>
+
+                    {dateError && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-600 text-sm">{dateError}</p>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-2">
                         <input
@@ -182,7 +228,7 @@ export function EditWorkoutModal({ isOpen, onClose, onUpdate, workout, loading =
                                 hover:bg-blue-600 hover:border-blue-600 hover:text-white hover:scale-105
                                 transition-all duration-400 ease-in-out h-[40px] w-1/2"
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || !!dateError}
                         >
                             {loading ? "Сохранение..." : "Сохранить"}
                         </Button>
