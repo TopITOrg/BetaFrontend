@@ -109,18 +109,6 @@ export default function ApplicationsPage() {
         }
     };
 
-    const handleWithdraw = async (requestId: number) => {
-        setProcessingRequestId(requestId);
-        try {
-            await updateRequest(requestId, 'deleted');
-            refetchAll();
-        } catch (error) {
-            console.error('Ошибка при отзыве заявки:', error);
-        } finally {
-            setProcessingRequestId(null);
-        }
-    };
-
     const requests = getRequests();
     const loading = getLoading();
     const error = getError();
@@ -177,10 +165,10 @@ export default function ApplicationsPage() {
                                     <Application
                                         key={request.id}
                                         request={request}
-                                        onApprove={() => handleApprove(request.id)}
-                                        onReject={() => handleReject(request.id)}
-                                        onWithdraw={user?.role?.toLowerCase() === 'student' ? () => handleWithdraw(request.id) : undefined}
+                                        onApprove={user?.role?.toLowerCase() !== 'student' ? () => handleApprove(request.id) : undefined}
+                                        onReject={user?.role?.toLowerCase() !== 'student' ? () => handleReject(request.id) : undefined}
                                         isProcessing={processingRequestId === request.id && updateLoading}
+                                        showActions={user?.role?.toLowerCase() !== 'student'}
                                     />
                                 ))}
                             </div>

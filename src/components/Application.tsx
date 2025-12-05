@@ -2,18 +2,18 @@ import type {ClubJoinRequest} from '@/hooks/useClubJoinRequests';
 
 interface ApplicationProps {
     request: ClubJoinRequest;
-    onApprove: () => void;
-    onReject: () => void;
-    onWithdraw?: () => void;
+    onApprove?: () => void;
+    onReject?: () => void;
     isProcessing: boolean;
+    showActions?: boolean;
 }
 
 export const Application: React.FC<ApplicationProps> = ({
                                                             request,
                                                             onApprove,
                                                             onReject,
-                                                            onWithdraw,
-                                                            isProcessing
+                                                            isProcessing,
+                                                            showActions = true // По умолчанию показываем
                                                         }) => {
     const getStatusColor = () => {
         switch (request.status.toLowerCase()) {
@@ -41,7 +41,7 @@ export const Application: React.FC<ApplicationProps> = ({
         }
     };
 
-    const canModify = request.status.toLowerCase() === 'submitted';
+    const canModify = request.status.toLowerCase() === 'submitted' && showActions;
 
     return (
         <div className={`border-2 rounded-4xl p-6 w-80 shadow-lg transition-all duration-200 hover:shadow-xl bg-white ${getStatusColor()}`}>
@@ -64,60 +64,60 @@ export const Application: React.FC<ApplicationProps> = ({
                     <p className="font-semibold text-lg text-gray-800">{request.club_name}</p>
                 </div>
 
-                <div>
-                    <p className="text-sm text-gray-600">Подана пользователем</p>
-                    <p className="font-medium text-gray-800">{request.user_name}</p>
-                </div>
+                {showActions && (
+                    <div>
+                        <p className="text-sm text-gray-600">Подана пользователем</p>
+                        <p className="font-medium text-gray-800">{request.user_name}</p>
+                    </div>
+                )}
 
                 <div>
                     <p className="text-sm text-gray-600">Дата подачи</p>
                     <p className="text-sm text-gray-700">{new Date(request.created_at).toLocaleDateString('ru-RU')}</p>
                 </div>
+
+                {showActions && (
+                    <div>
+                        <p className="text-sm text-gray-600">Статус</p>
+                        <p className="font-medium text-gray-800">{getStatusText()}</p>
+                    </div>
+                )}
             </div>
 
-            {onWithdraw ? (
-                <button
-                    className={`w-full h-[40px] items-center justify-center rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105 ${
-                        canModify
-                            ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                    onClick={onWithdraw}
-                    disabled={isProcessing || !canModify}
-                >
-                    {isProcessing ? 'Обработка...' : 'Отозвать заявку'}
-                </button>
-            ) : (
-                <div className="flex gap-3">
-                    <button
-                        className={`flex-1 h-[40px] items-center justify-center rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105  ${
-                            canModify
-                                ? 'bg-green-500 hover:bg-green-600 text-white'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                        onClick={onApprove}
-                        disabled={isProcessing || !canModify}
-                    >
-                        {isProcessing ? '...' : 'Принять'}
-                    </button>
-                    <button
-                        className={`flex-1 h-[40px] items-center justify-center rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105 ${
-                            canModify
-                                ? 'bg-red-500 hover:bg-red-600 text-white'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                        onClick={onReject}
-                        disabled={isProcessing || !canModify}
-                    >
-                        {isProcessing ? '...' : 'Отклонить'}
-                    </button>
-                </div>
-            )}
+            {/* Показываем кнопки только если showActions = true */}
+            {showActions && (
+                <>
+                    <div className="flex gap-3">
+                        <button
+                            className={`flex-1 h-[40px] items-center justify-center rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105  ${
+                                canModify
+                                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                            onClick={onApprove}
+                            disabled={isProcessing || !canModify}
+                        >
+                            {isProcessing ? '...' : 'Принять'}
+                        </button>
+                        <button
+                            className={`flex-1 h-[40px] items-center justify-center rounded-xl font-medium transition-all duuration-400 ease-in-out hover:scale-105 ${
+                                canModify
+                                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                            onClick={onReject}
+                            disabled={isProcessing || !canModify}
+                        >
+                            {isProcessing ? '...' : 'Отклонить'}
+                        </button>
+                    </div>
 
-            {!canModify && !onWithdraw && (
-                <p className="text-center text-sm text-gray-500 mt-3">
-                    Заявка уже обработана
-                </p>
+                    {!canModify && (
+                        <p className="text-center text-sm text-gray-500 mt-3">
+                            Заявка уже обработана
+                        </p>
+                    )}
+                </>
             )}
         </div>
     );
