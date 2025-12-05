@@ -69,7 +69,7 @@ export default function ClubsPage() {
                         </h1>
                         <p className="text-gray-600">
                             Пожалуйста, войдите в систему, чтобы увидеть доступные спортивные секции и подать заявку на
-                            участие.
+                            вступление.
                         </p>
                         <div className="flex flex-col gap-3">
                             <Link
