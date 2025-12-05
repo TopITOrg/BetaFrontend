@@ -7,6 +7,8 @@ import { Navbar } from "@/components/navbar"
 import { ClubCard } from "@/components/ClubCard"
 import { useState, useMemo } from "react";
 import { useClubs } from "@/hooks/useClubs";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type SkillLevel = 'beginner' | 'advanced' | 'gss';
 
@@ -58,25 +60,6 @@ export default function ClubsPage() {
                 <Navbar selectedButton={2} />
                 <div className="flex justify-center items-center h-64">
                     <div className="text-lg">Загрузка клубов...</div>
-                </div>
-            </main>
-        );
-    }
-
-    if (error && clubs.length === 0) {
-        return (
-            <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={2} />
-                <div className="flex flex-col justify-center items-center h-64 gap-4">
-                    <div className="text-red-500 text-lg text-center">
-                        Не удалось загрузить данные о секциях
-                    </div>
-                    <button
-                        onClick={refetch}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                        Попробовать снова
-                    </button>
                 </div>
             </main>
         );
@@ -145,26 +128,58 @@ export default function ClubsPage() {
             </div>
 
             <div className="px-20 pt-[1px]">
+                {/* Блок с ошибкой авторизации */}
+                {error && error.includes('Ошибка авторизации') && (
+                    <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-yellow-700">
+                            {error} Чтобы подать заявку в секцию, пожалуйста,{' '}
+                            <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                                войдите в систему
+                            </Link>.
+                        </p>
+                    </div>
+                )}
+
+                {/* Блок с другими ошибками */}
+                {error && !error.includes('Ошибка авторизации') && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-700">
+                            {error} <Button
+                            onClick={refetch}
+                            variant="link"
+                            className="text-red-700 hover:text-red-800 p-0 h-auto"
+                        >
+                            Попробовать снова
+                        </Button>
+                        </p>
+                    </div>
+                )}
+
+                {/* Основной контент */}
                 {filteredClubs.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                         {searchQuery || selectedLevels.length > 0
                             ? 'По вашему запросу ничего не найдено'
-                            : 'Нет доступных клубов'}
+                            : 'Нет доступных клубов'
+                        }
                     </div>
                 ) : (
-                    <div className="grid grid-cols-3 gap-2">
-                        {filteredClubs.map((club, index) => (
-                            <ClubCard key={club.id || index} clubData={club} />
-                        ))}
-                    </div>
-                )}
+                    <>
+                        {/* Информация для неавторизованных пользователей */}
+                        {error && error.includes('Ошибка авторизации') && (
+                            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p className="text-blue-700">
+                                    Вы просматриваете секции в режиме гостя. Чтобы подать заявку, необходимо войти в систему.
+                                </p>
+                            </div>
+                        )}
 
-                {error && (
-                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-yellow-700 text-sm">
-                            {error} (используются демо-данные)
-                        </p>
-                    </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {filteredClubs.map((club, index) => (
+                                <ClubCard key={club.id || index} clubData={club} />
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
         </main>

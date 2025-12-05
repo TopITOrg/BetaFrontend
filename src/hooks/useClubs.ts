@@ -20,25 +20,21 @@ export const useClubs = (): UseClubsResult => {
             setLoading(true);
             setError(null);
 
-            if (!isAuthenticated) {
-                setError('Пользователь не авторизован');
-                setLoading(false);
-                return;
-            }
-
+            // Получаем токен, если есть
             const token = localStorage.getItem('access_token');
-            if (!token) {
-                setError('Токен авторизации не найден');
-                setLoading(false);
-                return;
+
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+
+            // Добавляем токен только если пользователь авторизован
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/clubs/`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers,
                 body: JSON.stringify({
                     limit: 100,
                     offset: 0
@@ -46,8 +42,16 @@ export const useClubs = (): UseClubsResult => {
             });
 
             if (!response.ok) {
+                // Для неавторизованных пользователей все равно показываем клубы
+                if (response.status === 401 && !isAuthenticated) {
+                    console.log('Пользователь не авторизован, показываем пустой список клубов');
+                    setClubs([]);
+                    return;
+                }
+
+                // Для авторизованных пользователей показываем ошибку
                 if (response.status === 401) {
-                    setError('Ошибка авторизации');
+                    setError('Ошибка авторизации. Пожалуйста, войдите снова.');
                 } else {
                     throw new Error(`Ошибка загрузки: ${response.status}`);
                 }
@@ -94,12 +98,7 @@ export const useClubs = (): UseClubsResult => {
     };
 
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchClubs();
-        } else {
-            setLoading(false);
-            setError('Пользователь не авторизован');
-        }
+        fetchClubs();
     }, [isAuthenticated]);
 
     return {
