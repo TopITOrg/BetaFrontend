@@ -95,7 +95,7 @@ function ClubCard({clubData}: { clubData: ClubData }) {
         try {
             const token = localStorage.getItem('access_token');
 
-            const response = await fetch('http://localhost:8080/club-join-requests/', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/club-join-requests/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

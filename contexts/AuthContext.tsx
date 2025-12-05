@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
         }
 
         try {
-            const response = await fetch('http://localhost:8080/users/', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/users/`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

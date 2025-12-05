@@ -20,7 +20,7 @@ export const useDeleteWorkout = (): UseDeleteWorkoutResult => {
                 throw new Error('No access token found');
             }
 
-            const response = await fetch('http://localhost:8080/workouts/delete', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/workouts/delete`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

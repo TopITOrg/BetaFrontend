@@ -73,7 +73,7 @@ export const useClubJoinRequests = (params: UseClubJoinRequestsParams = {}): Use
             console.log('Fetching club join requests with body:', requestBody);
 
             // Отправляем POST запрос с JSON телом
-            const response = await fetch('http://localhost:8080/club-join-requests/get', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/club-join-requests/get`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

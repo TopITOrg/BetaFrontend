@@ -95,7 +95,7 @@ export default function EditSectionPage() {
                 return;
             }
 
-            const response = await fetch(`http://localhost:8080/clubs/update/${club.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/clubs/update/${club.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ export default function EditSectionPage() {
                 return;
             }
 
-            const response = await fetch(`http://localhost:8080/clubs/delete/${club.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/clubs/delete/${club.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

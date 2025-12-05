@@ -28,7 +28,7 @@ export const useUpdateWorkout = (): UseUpdateWorkoutResult => {
                 throw new Error('No access token found');
             }
 
-            const response = await fetch('http://localhost:8080/workouts/update', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/workouts/update`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
