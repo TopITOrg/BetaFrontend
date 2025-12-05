@@ -68,11 +68,6 @@ export default function LoginPage() {
                             />
                             <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20}/>
                         </div>
-
-                        <label className="text-blue-500 hover:text-blue-800 transition-colors duration-400 ease-in-out">
-                            Забыли пароль?
-                        </label>
-
                         <button
                             type="submit"
                             disabled={isPending}
