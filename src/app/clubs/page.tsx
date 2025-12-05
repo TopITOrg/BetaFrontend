@@ -1,21 +1,22 @@
 "use client"
 
 import {Search} from "lucide-react";
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Navbar } from "@/components/navbar"
-import { ClubCard } from "@/components/ClubCard"
-import { useState, useMemo } from "react";
-import { useClubs } from "@/hooks/useClubs";
-import { Button } from "@/components/ui/button";
+import {Input} from "@/components/ui/input"
+import {Checkbox} from "@/components/ui/checkbox"
+import {Navbar} from "@/components/navbar"
+import {ClubCard} from "@/components/ClubCard"
+import {useMemo, useState} from "react";
+import {useClubs} from "@/hooks/useClubs";
 import Link from "next/link";
+import {useAuth} from "../../../contexts/AuthContext";
 
 type SkillLevel = 'beginner' | 'advanced' | 'gss';
 
 export default function ClubsPage() {
+    const {isAuthenticated} = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLevels, setSelectedLevels] = useState<SkillLevel[]>([]);
-    const { clubs, loading, error, refetch } = useClubs();
+    const {clubs, loading, error, refetch} = useClubs();
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
@@ -54,10 +55,46 @@ export default function ClubsPage() {
         return filtered;
     }, [selectedLevels, searchQuery, clubs]);
 
+    // Если не авторизован, показываем сообщение
+    if (!isAuthenticated) {
+        return (
+            <main className="flex flex-col min-h-screen bg-white">
+                <div className="flex flex-col sticky top-0 bg-white z-10 gap-2 mb-2">
+                    <Navbar selectedButton={2}/>
+                </div>
+                <div className="flex flex-col items-center justify-center flex-1 px-20">
+                    <div className="text-center space-y-6 max-w-md">
+                        <h1 className="text-2xl font-semibold text-gray-800">
+                            Для просмотра секций требуется авторизация
+                        </h1>
+                        <p className="text-gray-600">
+                            Пожалуйста, войдите в систему, чтобы увидеть доступные спортивные секции и подать заявку на
+                            участие.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <Link
+                                href="/login"
+                                className="w-full inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                            >
+                                Войти в систему
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="w-full inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                            >
+                                Зарегистрироваться
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
     if (loading) {
         return (
             <main className="flex flex-col min-h-screen bg-white">
-                <Navbar selectedButton={2} />
+                <Navbar selectedButton={2}/>
                 <div className="flex justify-center items-center h-64">
                     <div className="text-lg">Загрузка клубов...</div>
                 </div>
@@ -68,7 +105,7 @@ export default function ClubsPage() {
     return (
         <main className="flex flex-col min-h-screen bg-white">
             <div className="flex flex-col sticky top-0 bg-white z-10 gap-2 mb-2">
-                <Navbar selectedButton={2} />
+                <Navbar selectedButton={2}/>
                 <div className="w-full border-gray-100 flex flex-col justify-center px-20">
                     <div className="h-[40px] relative">
                         <Input
@@ -77,7 +114,8 @@ export default function ClubsPage() {
                             value={searchQuery}
                             onChange={handleSearchChange}
                         />
-                        <Search className="size-[18px] text-gray-500 absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-3" />
+                        <Search
+                            className="size-[18px] text-gray-500 absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-3"/>
                     </div>
                 </div>
 
@@ -128,58 +166,32 @@ export default function ClubsPage() {
             </div>
 
             <div className="px-20 pt-[1px]">
-                {/* Блок с ошибкой авторизации */}
-                {error && error.includes('Ошибка авторизации') && (
-                    <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-yellow-700">
-                            {error} Чтобы подать заявку в секцию, пожалуйста,{' '}
-                            <Link href="/login" className="text-blue-600 hover:underline font-medium">
-                                войдите в систему
-                            </Link>.
-                        </p>
-                    </div>
-                )}
-
-                {/* Блок с другими ошибками */}
-                {error && !error.includes('Ошибка авторизации') && (
-                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-700">
-                            {error} <Button
+                {error && (
+                    <div className="flex flex-col justify-center items-center h-64 gap-4">
+                        <div className="text-red-500 text-lg text-center">
+                            Не удалось загрузить данные о секциях
+                        </div>
+                        <button
                             onClick={refetch}
-                            variant="link"
-                            className="text-red-700 hover:text-red-800 p-0 h-auto"
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                         >
                             Попробовать снова
-                        </Button>
-                        </p>
+                        </button>
                     </div>
                 )}
 
-                {/* Основной контент */}
-                {filteredClubs.length === 0 ? (
+                {!error && filteredClubs.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                         {searchQuery || selectedLevels.length > 0
                             ? 'По вашему запросу ничего не найдено'
-                            : 'Нет доступных клубов'
-                        }
+                            : 'Нет доступных клубов'}
                     </div>
                 ) : (
-                    <>
-                        {/* Информация для неавторизованных пользователей */}
-                        {error && error.includes('Ошибка авторизации') && (
-                            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <p className="text-blue-700">
-                                    Вы просматриваете секции в режиме гостя. Чтобы подать заявку, необходимо войти в систему.
-                                </p>
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-3 gap-2">
-                            {filteredClubs.map((club, index) => (
-                                <ClubCard key={club.id || index} clubData={club} />
-                            ))}
-                        </div>
-                    </>
+                    <div className="grid grid-cols-3 gap-2">
+                        {filteredClubs.map((club, index) => (
+                            <ClubCard key={club.id || index} clubData={club}/>
+                        ))}
+                    </div>
                 )}
             </div>
         </main>

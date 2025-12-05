@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import type { ClubData } from '@/components/ClubCard';
-import { useAuth } from '../../contexts/AuthContext';
+import {useEffect, useState} from 'react';
+import type {ClubData} from '@/components/ClubCard';
+import {useAuth} from '../../contexts/AuthContext';
 
 interface UseClubsResult {
     clubs: ClubData[];
@@ -13,28 +13,32 @@ export const useClubs = (): UseClubsResult => {
     const [clubs, setClubs] = useState<ClubData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { user, isAuthenticated } = useAuth();
+    const {user, isAuthenticated} = useAuth();
 
     const fetchClubs = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // Получаем токен, если есть
+            // Если не авторизован, не делаем запрос
+            if (!isAuthenticated) {
+                setLoading(false);
+                return;
+            }
+
             const token = localStorage.getItem('access_token');
-
-            const headers: HeadersInit = {
-                'Content-Type': 'application/json',
-            };
-
-            // Добавляем токен только если пользователь авторизован
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
+            if (!token) {
+                setError('Токен авторизации не найден');
+                setLoading(false);
+                return;
             }
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/clubs/`, {
                 method: 'POST',
-                headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify({
                     limit: 100,
                     offset: 0
@@ -42,16 +46,8 @@ export const useClubs = (): UseClubsResult => {
             });
 
             if (!response.ok) {
-                // Для неавторизованных пользователей все равно показываем клубы
-                if (response.status === 401 && !isAuthenticated) {
-                    console.log('Пользователь не авторизован, показываем пустой список клубов');
-                    setClubs([]);
-                    return;
-                }
-
-                // Для авторизованных пользователей показываем ошибку
                 if (response.status === 401) {
-                    setError('Ошибка авторизации. Пожалуйста, войдите снова.');
+                    setError('Ошибка авторизации');
                 } else {
                     throw new Error(`Ошибка загрузки: ${response.status}`);
                 }
@@ -98,7 +94,12 @@ export const useClubs = (): UseClubsResult => {
     };
 
     useEffect(() => {
-        fetchClubs();
+        if (isAuthenticated) {
+            fetchClubs();
+        } else {
+            setLoading(false);
+            setClubs([]);
+        }
     }, [isAuthenticated]);
 
     return {
